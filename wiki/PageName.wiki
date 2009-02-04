@@ -1,0 +1,18 @@
+#summary Quickstart, how to use, manual, etc...
+
+== Example: reading grammar from BNF string ==
+
+First, we need to store grammar in a string. Let's say we have a following grammar:
+
+{{{
+positive-number ::= (%digit% { %digit% })
+negative-number ::= ("-" positive-number)
+
+addition ::= (("+" | "-") (positive-number | ("(" negative-number ")") | mul-expression))
+sum-expression ::= ((positive-number | negative-number | mul-expression) addition {addition})
+
+multiplication ::= (("*" | "/") (positive-number | ("(" negative-number ")") | ("(" sum-expression ")")))
+mul-expression ::= ((positive-number | negative-number | ("(" sum-expression ")")) multiplication {multiplication})
+
+expression ::= sum-expression
+}}}
