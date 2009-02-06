@@ -1,0 +1,41 @@
+#summary Tutorial, quickstart, whatever you name it...
+
+== Example: reading grammar from BNF ==
+
+Let's say we have a following grammar in a file :
+
+{{{
+positive-number ::= (%digit% { %digit% })
+negative-number ::= ("-" positive-number)
+
+addition ::= (("+" | "-") (positive-number | ("(" negative-number ")") | mul-expression))
+sum-expression ::= ((positive-number | negative-number | mul-expression) addition {addition})
+
+multiplication ::= (("*" | "/") (positive-number | ("(" negative-number ")") | ("(" sum-expression ")")))
+mul-expression ::= ((positive-number | negative-number | ("(" sum-expression ")")) multiplication {multiplication})
+
+expression ::= sum-expression
+}}}
+
+First, we need to store this grammar in a `String`.
+
+{{{
+String grammar = Files.readFileAsString(new File("path/to/file"));
+}}}
+
+Next, parse it into a `Matcher`. 
+The second parameter is the "top-level" expression of this grammar.
+
+{{{
+Matcher expression = Grammar.generate(grammar, "expression");
+}}}
+
+Using this `Matcher`, we can parse arithmetic expressions into `Node` trees. But given that a grammar may be ambiguous, the `Matchers.fullMatch`  method returns a list of `Results`, each of them a different representation of the expression. Ideally, though, there will be only one `Result` in the list (or none if the expression doesn't conform to the grammar).
+
+{{{
+List<Result> results = Matchers.fullMatch(matcher, "2+2");
+Result firstResult = results.get(0);
+NamedNode root = firstResult.node;
+}}}
+
+What does it mean
