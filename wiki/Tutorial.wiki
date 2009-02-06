@@ -30,7 +30,9 @@ The second parameter is the "top-level" expression of this grammar.
 Matcher expression = Grammar.generate(grammar, "expression");
 }}}
 
-Using this `Matcher`, we can parse arithmetic expressions into `Node` trees. But given that a grammar may be ambiguous, the `Matchers.fullMatch`  method returns a list of `Results`, each of them a different representation of the expression. Ideally, though, there will be only one `Result` in the list (or none if the expression doesn't conform to the grammar).
+Using this `Matcher`, we can parse `String`s into `NamedNode` trees. 
+
+But given that a grammar may be ambiguous, the `Matchers.fullMatch`  method returns a list of `Results`, each of them a different representation of the expression. Ideally, though, there will be only one `Result` in the list (or none if the expression doesn't conform to the grammar).
 
 {{{
 List<Result> results = Matchers.fullMatch(matcher, "2+2");
