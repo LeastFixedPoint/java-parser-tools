@@ -1,4 +1,5 @@
 #summary Tutorial, quickstart, whatever you name it...
+#labels Featured
 
 == Example: reading grammar from BNF ==
 
