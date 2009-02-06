@@ -53,6 +53,6 @@ System.out.println(addition .id); // prints "addition"
 NamedNode secondArgument = addition.getNamedChildren().get(0);
 System.out.println(secondArgument .id); // prints "positive-number"
 
-System.out.println(firstArgument.text + " + " + secondArgument.text);
+System.out.println(firstArgument.getText()+ " + " + secondArgument.getText());
 // prints "2 + 2"
 }}}
