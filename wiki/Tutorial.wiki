@@ -2,7 +2,7 @@
 
 == Example: reading grammar from BNF ==
 
-Let's say we have a following grammar in a file :
+Let's say we have a following grammar stored in a file.
 
 {{{
 positive-number ::= (%digit% { %digit% })
@@ -17,7 +17,7 @@ mul-expression ::= ((positive-number | negative-number | ("(" sum-expression ")"
 expression ::= sum-expression
 }}}
 
-First, we need to store this grammar in a `String`.
+First, we need to read this grammar as a `String`.
 
 {{{
 String grammar = Files.readFileAsString(new File("path/to/file"));
@@ -35,7 +35,24 @@ Using this `Matcher`, we can parse arithmetic expressions into `Node` trees. But
 {{{
 List<Result> results = Matchers.fullMatch(matcher, "2+2");
 Result firstResult = results.get(0);
-NamedNode root = firstResult.node;
+NamedNode root = (NamedNode) firstResult.node;
 }}}
 
-What does it mean
+That root node corresponds to the "expression" rule in the grammar. We can descend into child nodes using the `getNamedChildren()` method of a `NamedNode`.
+
+{{{
+NamedNode sumExpression = root.getNamedChildren().get(0);
+System.out.println(sumExpression.id); // prints "sum-expression"
+
+NamedNode firstArgument = sumExpression.getNamedChildren().get(0);
+System.out.println(firstArgument .id); // prints "positive-number"
+
+NamedNode addition = sumExpression.getNamedChildren().get(1);
+System.out.println(addition .id); // prints "addition"
+
+NamedNode secondArgument = addition.getNamedChildren().get(0);
+System.out.println(secondArgument .id); // prints "positive-number"
+
+System.out.println(firstArgument.text + " + " + secondArgument.text);
+// prints "2 + 2"
+}}}
