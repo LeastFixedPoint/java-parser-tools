@@ -1,4 +1,5 @@
 #summary Format of the recognizable BNF strings.
+#labels Featured
 
 A BNF string has the following format:
 
