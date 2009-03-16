@@ -48,13 +48,13 @@ NamedNode sumExpression = root.getNamedChildren().get(0);
 System.out.println(sumExpression.id); // prints "sum-expression"
 
 NamedNode firstArgument = sumExpression.getNamedChildren().get(0);
-System.out.println(firstArgument .id); // prints "positive-number"
+System.out.println(firstArgument.id); // prints "positive-number"
 
 NamedNode addition = sumExpression.getNamedChildren().get(1);
-System.out.println(addition .id); // prints "addition"
+System.out.println(addition.id); // prints "addition"
 
 NamedNode secondArgument = addition.getNamedChildren().get(0);
-System.out.println(secondArgument .id); // prints "positive-number"
+System.out.println(secondArgument.id); // prints "positive-number"
 
 System.out.println(firstArgument.getText()+ " + " + secondArgument.getText());
 // prints "2 + 2"
