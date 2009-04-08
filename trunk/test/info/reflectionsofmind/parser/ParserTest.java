@@ -9,8 +9,6 @@ import org.junit.Test;
 
 import info.reflectionsofmind.parser.matcher.Matcher;
 
-/**
-*/
 public class ParserTest
 {
 	@Test
