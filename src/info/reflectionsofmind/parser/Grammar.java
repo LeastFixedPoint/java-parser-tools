@@ -64,10 +64,13 @@ public class Grammar
 		{
 			String identifier= identifierNode.getText();
 			if (definitions.get(identifier) == null)
-				throw new UndefinedSymbolException("Undefined symbol:"+identifier);
+				throw new UndefinedSymbolException(identifier);
 		}
 
-		return definitions.get(rootDefinition);
+		Matcher matcher= definitions.get(rootDefinition);
+		if (matcher == null)
+			throw new UndefinedSymbolException(rootDefinition);
+		return matcher;
 	}
 
 	private static Matcher createMatcher(final NamedNode expression, final Map<String, NamedMatcher> definitions)
