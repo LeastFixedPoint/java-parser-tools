@@ -88,6 +88,7 @@ public class Grammar
 		if ("anyUpper".equals(expression.id)) return range('A', 'Z');
 		if ("anyAlpha".equals(expression.id)) return cho(range('a', 'z'), range('A', 'Z'));
 		if ("anyDigit".equals(expression.id)) return range('0', '9');
+		if ("anyWhitespace".equals(expression.id)) return minc(1, str(" "), str("\t"), str("\n"), str("\r"));
 
 		throw new RuntimeException("Cannot parse expresion [" + expression.id + "]:\n" + Nodes.toStringFull(expression));
 	}
@@ -107,6 +108,7 @@ public class Grammar
 		final NamedMatcher anyUpper = new NamedMatcher("anyUpper").define(str("%upper%"));
 		final NamedMatcher anyAlpha = new NamedMatcher("anyAlpha").define(str("%alpha%"));
 		final NamedMatcher anyDigit = new NamedMatcher("anyDigit").define(str("%digit%"));
+		final NamedMatcher anyWhitespace = new NamedMatcher("anyWhitespace").define(str("%whitespace%"));
 
 		final NamedMatcher expression = new NamedMatcher("expression");
 		final NamedMatcher definition = new NamedMatcher("definition");
@@ -158,7 +160,7 @@ public class Grammar
 		expression.define(cho( //
 				seq, rep, reps, repc, opt, opts, optc, cho, // 
 				identifier, seq(str("\""), string, str("\"")), //
-				anyLower, anyUpper, anyAlpha, anyDigit));
+				anyLower, anyUpper, anyAlpha, anyDigit, anyWhitespace));
 
 		grammar.define(seq(optwh, reps(definition, whitespace), opt(definition)));
 
