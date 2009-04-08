@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import info.reflectionsofmind.parser.exception.GrammarParsingException;
 import info.reflectionsofmind.parser.matcher.Matcher;
 
 public class ParserTest
@@ -60,8 +61,8 @@ public class ParserTest
 		Assert.assertEquals(2, results.size());
 		Assert.assertEquals(2, results.get(0).rest);
 		Assert.assertEquals(3, results.get(1).rest);
-		Assert.assertTrue(results.get(0).node.children.isEmpty());
-		Assert.assertTrue(results.get(1).node.children.isEmpty());
+		Assert.assertTrue(!results.get(0).node.children.isEmpty());
+		Assert.assertTrue(!results.get(1).node.children.isEmpty());
 	}
 
 	@Test
@@ -123,5 +124,17 @@ public class ParserTest
 		List<Result> results = rep.match("12312123");
 
 		Assert.assertTrue(results.isEmpty());
+	}
+
+	@Test
+	public void testDetectMissingSymbols()
+	{
+		String grammar= "a ::= (b c)\nb ::= %digit%";
+		try {
+			Grammar.generate(grammar, "a");
+			Assert.fail("The Grammar.generate method failed to detect that the 'c' symbol is not defined.");
+		}
+		catch (GrammarParsingException e) {
+		}
 	}
 }

@@ -1,6 +1,5 @@
 package info.reflectionsofmind.parser.node;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class NamedNode extends AbstractNode
@@ -17,25 +16,7 @@ public class NamedNode extends AbstractNode
 
 	public List<NamedNode> getNamedChildren()
 	{
-		return getNamedChildren(this);
+		return Navigation.getNamedChildren(this);
 	}
 
-	private List<NamedNode> getNamedChildren(AbstractNode root)
-	{
-		List<NamedNode> namedNodes = new ArrayList<NamedNode>();
-
-		for (AbstractNode node : root.children)
-		{
-			if (node instanceof NamedNode)
-			{
-				namedNodes.add((NamedNode) node);
-			}
-			else
-			{
-				namedNodes.addAll(getNamedChildren(node));
-			}
-		}
-
-		return namedNodes;
-	}
 }

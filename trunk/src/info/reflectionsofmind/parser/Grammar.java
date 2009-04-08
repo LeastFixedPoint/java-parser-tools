@@ -15,10 +15,13 @@ import static info.reflectionsofmind.parser.Parsers.str;
 import info.reflectionsofmind.parser.exception.AmbiguousGrammarException;
 import info.reflectionsofmind.parser.exception.GrammarParsingException;
 import info.reflectionsofmind.parser.exception.InvalidGrammarException;
+import info.reflectionsofmind.parser.exception.UndefinedSymbolException;
 import info.reflectionsofmind.parser.matcher.Matcher;
 import info.reflectionsofmind.parser.matcher.Matchers;
 import info.reflectionsofmind.parser.matcher.NamedMatcher;
+import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.NamedNode;
+import info.reflectionsofmind.parser.node.Navigation;
 import info.reflectionsofmind.parser.node.Nodes;
 
 import java.util.ArrayList;
@@ -53,6 +56,15 @@ public class Grammar
 			final String identifier = definition.getNamedChildren().get(0).getText();
 			final NamedNode expression = definition.getNamedChildren().get(1);
 			definitions.get(identifier).define(createMatcher(expression, definitions));
+		}
+
+		// check for undefined identifiers
+		List<AbstractNode> identifierNodes= Navigation.findAllDecendentsById(grammar, "identifier");
+		for (AbstractNode identifierNode : identifierNodes) 
+		{
+			String identifier= identifierNode.getText();
+			if (definitions.get(identifier) == null)
+				throw new UndefinedSymbolException("Undefined symbol:"+identifier);
 		}
 
 		return definitions.get(rootDefinition);
