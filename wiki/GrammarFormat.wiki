@@ -23,7 +23,7 @@ An expression may contain following elements:
 || `{a|b|c}` || Sequence of any number of a's, b's and c's in any order. ||
 || `[a b c]` || Either a, then b, then c, or nothing at all. ||
 || `[a|b|c]` || Either a, or b, or c, or nothing at all. ||
-|| `"text"` || This exact text. ||
+|| `"text"` || This exact text.  Double quotes in the text may be escaped with single quotes.  For example "'"this text begins and ends with a double quote'"". ||
 || `%lower%` || Lower case letter. ||
 || `%upper%` || Upper case letter. ||
 || `%alpha%` || Any case letter. ||
