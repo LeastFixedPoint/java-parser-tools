@@ -7,6 +7,30 @@ import java.util.List;
 public class Navigation
 {
 
+	/**
+	 * @return first found node with denoted id.  Returns null if not found.
+	 */
+	public static AbstractNode findDecendentById(AbstractNode root, String id)
+	{
+		List<AbstractNode> todo = new ArrayList<AbstractNode>();
+		HashSet<AbstractNode> done = new HashSet<AbstractNode>();
+		todo.addAll(root.children);
+
+		while (!todo.isEmpty()) 
+		{
+			AbstractNode node= todo.remove(0);
+			if (done.contains(node))
+				continue;
+			
+			if (id.equals(node.id))
+				return node;
+			
+			todo.addAll(node.children);
+		}
+
+		return null;
+	}	
+
 	public static List<AbstractNode> findAllDecendentsById(AbstractNode root, String id)
 	{
 		List<AbstractNode> matches = new ArrayList<AbstractNode>();
