@@ -162,10 +162,12 @@ public class Grammar
 			{
 				int pos = input.indexOf('"');
 				while (pos > 0 && input.charAt(pos - 1) == '\'')
-					pos = input.indexOf('"');
+					pos = input.indexOf('"', pos+1);
 
 				if (pos == -1) return Collections.<Result> emptyList();
-				else return Arrays.asList(new Result(new NamedNode("string", input.substring(0, pos)), pos));
+				
+				String text= input.substring(0, pos).replaceAll("\'\"", "\"");
+				return Arrays.asList(new Result(new NamedNode("string", text), pos));
 			}
 		});
 
