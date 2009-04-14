@@ -33,7 +33,8 @@ public final class SequenceMatcher implements Matcher
 		{
 			if (result.node != null)
 			{
-				for (final Result subResult : Parsers.seq(Parsers.tail(matchers)).match(input.substring(result.rest)))
+				List<Result> subResults= Parsers.seq(Parsers.tail(matchers)).match(input.substring(result.rest));
+				for (final Result subResult : subResults)
 				{
 					final AbstractNode node = new SequenceNode();
 					node.children.add(result.node);
