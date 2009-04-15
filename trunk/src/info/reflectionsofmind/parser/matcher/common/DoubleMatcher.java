@@ -1,13 +1,14 @@
-package info.reflectionsofmind.parser.matcher;
+package info.reflectionsofmind.parser.matcher.common;
 
 import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.matcher.Matcher;
 import info.reflectionsofmind.parser.node.StringNode;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class DecimalMatcher
+public class DoubleMatcher
 implements Matcher
 {
 	static final private IntegerMatcher __integerMatcher= new IntegerMatcher();

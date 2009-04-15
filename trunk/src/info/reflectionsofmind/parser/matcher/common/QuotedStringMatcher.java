@@ -1,6 +1,7 @@
-package info.reflectionsofmind.parser.matcher;
+package info.reflectionsofmind.parser.matcher.common;
 
 import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.matcher.Matcher;
 import info.reflectionsofmind.parser.node.StringNode;
 
 import java.util.Arrays;
@@ -13,7 +14,7 @@ implements Matcher
 	@Override
 	public List<Result> match(String input)
 	{
-		if (input.charAt(0) != '"' )
+		if (input.length() <= 0 || input.charAt(0) != '"' )
 			return Collections.<Result> emptyList();
 		
 		int pos = input.indexOf('"', 1);
