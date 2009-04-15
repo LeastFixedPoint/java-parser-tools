@@ -1,6 +1,8 @@
 package info.reflectionsofmind.parser;
 
 import info.reflectionsofmind.parser.matcher.ChoiceMatcher;
+import info.reflectionsofmind.parser.matcher.ExcludingMatcher;
+import info.reflectionsofmind.parser.matcher.LongestMatcher;
 import info.reflectionsofmind.parser.matcher.Matcher;
 import info.reflectionsofmind.parser.matcher.RangeMatcher;
 import info.reflectionsofmind.parser.matcher.RepetitionMatcher;
@@ -38,6 +40,16 @@ public final class Parsers
 	public static Matcher cho(final Matcher... matchers)
 	{
 		return new ChoiceMatcher(matchers);
+	}
+	
+	public static Matcher longest(final Matcher... matchers)
+	{
+		return new LongestMatcher(matchers);
+	}
+	
+	public static Matcher ex(final Matcher matcher, final Matcher... filters)
+	{
+		return new ExcludingMatcher(matcher, filters);
 	}
 
 	// ============================================================================================
@@ -149,5 +161,19 @@ public final class Parsers
 	public static <T> Matcher[] tail(final Matcher[] array)
 	{
 		return Arrays.asList(array).subList(1, array.length).toArray(new Matcher[] {});
+	}
+
+	// ============================================================================================
+	// === LONGEST MATCHERS
+	// ============================================================================================
+
+	public static Matcher longs(final Matcher... matchers)
+	{
+		return longest(seq(matchers));
+	}
+
+	public static Matcher longc(final Matcher... matchers)
+	{
+		return longest(cho(matchers));
 	}
 }
