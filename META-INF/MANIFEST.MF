@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Java_parser_tools
+Bundle-SymbolicName: com.googlecode.java_parser_tools
+Bundle-Version: 1.0.0
+Export-Package: info.reflectionsofmind.parser,
+ info.reflectionsofmind.parser.exception,
+ info.reflectionsofmind.parser.matcher,
+ info.reflectionsofmind.parser.matcher.common,
+ info.reflectionsofmind.parser.matcher.contrib,
+ info.reflectionsofmind.parser.node,
+ info.reflectionsofmind.util
+Bundle-ClassPath: java-parser-tools.jar
