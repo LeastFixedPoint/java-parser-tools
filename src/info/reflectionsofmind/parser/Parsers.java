@@ -80,6 +80,31 @@ public final class Parsers
 	{
 		return new RepetitionMatcher(min, max, matcher);
 	}
+	
+	public static Matcher lrep(final Matcher matchers)
+	{
+		return new LongestMatcher(rep(matchers));
+	}
+
+	public static Matcher lrep(final int num, final Matcher matchers)
+	{
+		return new LongestMatcher(rep(num, matchers));
+	}
+
+	public static Matcher lmin(final int min, final Matcher matchers)
+	{
+		return new LongestMatcher(min(min, matchers));
+	}
+
+	public static Matcher lmax(final int max, final Matcher matchers)
+	{
+		return new LongestMatcher(max(max, matchers));
+	}
+
+	public static Matcher lrep(final int min, final int max, final Matcher matcher)
+	{
+		return new LongestMatcher(rep(min, max, matcher));
+	}
 
 	// ============================================================================================
 	// === REPETITION OF SEQUENCE MATCHERS
@@ -109,6 +134,33 @@ public final class Parsers
 	{
 		return new RepetitionMatcher(min, max, RepetitionMatcher.Type.SEQUENCE, matchers);
 	}
+	
+	public static Matcher lreps(final Matcher... matchers)
+	{
+		return new LongestMatcher(reps(matchers));
+	}
+
+	public static Matcher lreps(final int num, final Matcher... matchers)
+	{
+		return new LongestMatcher(reps(num, matchers));
+	}
+
+	public static Matcher lmins(final int min, final Matcher... matchers)
+	{
+		return new LongestMatcher(mins(min, matchers));
+	}
+
+	public static Matcher lmaxs(final int max, final Matcher... matchers)
+	{
+		return new LongestMatcher(maxs(max, matchers));
+	}
+
+	public static Matcher lreps(final int min, final int max, final Matcher... matchers)
+	{
+		return new LongestMatcher(reps(min, max, matchers));
+	}
+	
+	
 
 	// ============================================================================================
 	// === REPETITION OF CHOICE MATCHERS
@@ -137,6 +189,31 @@ public final class Parsers
 	public static Matcher repc(final int min, final int max, final Matcher... matchers)
 	{
 		return new RepetitionMatcher(min, max, RepetitionMatcher.Type.CHOICE, matchers);
+	}
+	
+	public static Matcher lrepc(final Matcher... matchers)
+	{
+		return new LongestMatcher(repc(matchers));
+	}
+
+	public static Matcher lrepc(final int num, final Matcher... matchers)
+	{
+		return new LongestMatcher(repc(num, matchers));
+	}
+
+	public static Matcher lminc(final int min, final Matcher... matchers)
+	{
+		return new LongestMatcher(minc(min, matchers));
+	}
+
+	public static Matcher lmaxc(final int max, final Matcher... matchers)
+	{
+		return new LongestMatcher(maxc(max, matchers));
+	}
+
+	public static Matcher lrepc(final int min, final int max, final Matcher... matchers)
+	{
+		return new LongestMatcher(repc(min, max, matchers));
 	}
 
 	// ============================================================================================
@@ -167,12 +244,12 @@ public final class Parsers
 	// === LONGEST MATCHERS
 	// ============================================================================================
 
-	public static Matcher longs(final Matcher... matchers)
+	public static Matcher lseq(final Matcher... matchers)
 	{
 		return longest(seq(matchers));
 	}
 
-	public static Matcher longc(final Matcher... matchers)
+	public static Matcher lcho(final Matcher... matchers)
 	{
 		return longest(cho(matchers));
 	}

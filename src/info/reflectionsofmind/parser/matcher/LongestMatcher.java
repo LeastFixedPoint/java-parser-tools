@@ -3,44 +3,55 @@
  */
 package info.reflectionsofmind.parser.matcher;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
+import info.reflectionsofmind.parser.node.AbstractNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class LongestMatcher implements Matcher
+public class LongestMatcher extends ChoiceMatcher
 {
-	private final Matcher[] matchers;
-
-	public LongestMatcher(Matcher[] matchers)
+	public LongestMatcher(Matcher... matchers)
 	{
-		this.matchers = matchers;
+		super(matchers);
 	}
 
 	@Override
-	public List<Result> match(final String input)
+	public MatchResults match(final String input, int start) 
 	{
-		final List<Result> allResults = new ArrayList<Result>();
-		int maxRest= 0;
+		final List<AbstractNode> allResults = new ArrayList<AbstractNode>();
+		int max= 0;
 		
 		for (int i = 0; i < matchers.length; i++)
 		{
-			for (final Result result : matchers[i].match(input))
+			for (AbstractNode match : matchers[i].match(input, start).matches)
 			{
-				allResults.add(result);
-				if (maxRest < result.rest)
-					maxRest= result.rest;
+				allResults.add(match);
+				if (max < match.end)
+					max= match.end;
 			}
 		}
 
 		if (allResults.isEmpty())
-			return allResults;
+			return new MatchResults(super.getLabel(), start);
 		
-		final List<Result> longestResults = new ArrayList<Result>();
-		for (Result result : allResults)
-			if (maxRest <= result.rest)
+		final List<AbstractNode> longestResults = new ArrayList<AbstractNode>();
+		for (AbstractNode result : allResults)
+			if (max <= result.end)
 				longestResults.add(result);
 
-		return longestResults;
+		return new MatchResults(longestResults);
+	}
+
+	public String getLabel()
+	{
+		String label= "the longest element that matches any of the following: ";
+		for (int i= 0; i < matchers.length; i++)
+		{
+			if (0 < i)
+				label+= (i == matchers.length - 1) ? ", or " : ", ";
+			label+= matchers[i].getLabel();
+		}
+		return label;
 	}
 }

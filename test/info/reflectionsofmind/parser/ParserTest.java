@@ -1,129 +1,144 @@
 package info.reflectionsofmind.parser;
 
-import static info.reflectionsofmind.parser.Parsers.*;
+import static info.reflectionsofmind.parser.Parsers.cho;
+import static info.reflectionsofmind.parser.Parsers.opt;
+import static info.reflectionsofmind.parser.Parsers.reps;
+import static info.reflectionsofmind.parser.Parsers.seq;
+import static info.reflectionsofmind.parser.Parsers.str;
+import info.reflectionsofmind.parser.exception.GrammarParsingException;
+import info.reflectionsofmind.parser.matcher.Matcher;
 
-import java.util.List;
+import java.text.ParseException;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import info.reflectionsofmind.parser.exception.GrammarParsingException;
-import info.reflectionsofmind.parser.matcher.Matcher;
-
 public class ParserTest
 {
 	@Test
-	public void testValSuccess()
+	public void testValSuccess() throws ParseException
 	{
 		Matcher val = str("test");
-		List<Result> results = val.match("test1");
+		MatchResults results = val.match("test1");
 
-		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(4, results.get(0).rest);
-		Assert.assertTrue(results.get(0).node.children.isEmpty());
+		Assert.assertTrue(results.success());
+		Assert.assertEquals(1, results.matches.size());
+		Assert.assertEquals(4, results.matches.get(0).end);
+		Assert.assertTrue(results.matches.get(0).children.isEmpty());
 	}
 
 	@Test
-	public void testValFailure()
+	public void testValFailure() throws ParseException
 	{
 		Matcher val = str("test");
-		List<Result> results = val.match("tes1t");
+		MatchResults matchResults= val.match("tes1t");
 
-		Assert.assertEquals(0, results.size());
+		Assert.assertFalse(matchResults.success());
+		Assert.assertEquals(3, matchResults.position);
 	}
 
 	@Test
-	public void testSeqSuccess()
+	public void testSeqSuccess() throws ParseException
 	{
 		Matcher seq = seq(str("1"), str("2"));
-		List<Result> results = seq.match("123");
+		MatchResults results = seq.match("123");
 
-		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(2, results.get(0).rest);
-		Assert.assertEquals(2, results.get(0).node.children.size());
+		Assert.assertTrue(results.success());
+		Assert.assertEquals(1, results.matches.size());
+		Assert.assertEquals(2, results.matches.get(0).end);
+		Assert.assertEquals(2, results.matches.get(0).children.size());
 	}
 
 	@Test
-	public void testSeqFailure()
+	public void testSeqFailure() throws ParseException
 	{
 		Matcher seq = seq(str("1"), str("2"));
-		List<Result> results = seq.match("132");
-
-		Assert.assertTrue(results.isEmpty());
+		MatchResults results = seq.match("132");
+		
+		Assert.assertFalse(results.success());
+		Assert.assertEquals(1, results.position);
 	}
 
 	@Test
-	public void testChoSuccess()
+	public void testChoSuccess() throws ParseException
 	{
 		Matcher cho = cho(str("12"), str("123"));
-		List<Result> results = cho.match("1234");
+		MatchResults results = cho.match("1234");
 
-		Assert.assertEquals(2, results.size());
-		Assert.assertEquals(2, results.get(0).rest);
-		Assert.assertEquals(3, results.get(1).rest);
-		Assert.assertTrue(!results.get(0).node.children.isEmpty());
-		Assert.assertTrue(!results.get(1).node.children.isEmpty());
+		Assert.assertTrue(results.success());
+		Assert.assertEquals(2, results.matches.size());
+		Assert.assertEquals(2, results.matches.get(0).end);
+		Assert.assertEquals(3, results.matches.get(1).end);
+		Assert.assertTrue(!results.matches.get(0).children.isEmpty());
+		Assert.assertTrue(!results.matches.get(1).children.isEmpty());
 	}
 
 	@Test
-	public void testChoFailure()
+	public void testChoFailure() throws ParseException
 	{
 		Matcher cho = cho(str("12"), str("123"));
-		List<Result> results = cho.match("132");
+		MatchResults results = cho.match("132");
 
-		Assert.assertTrue(results.isEmpty());
+		Assert.assertFalse(results.success());
+		Assert.assertEquals(0, results.position);
 	}
 
 	@Test
-	public void testOptPresent()
+	public void testOptPresent() throws ParseException
 	{
 		Matcher opt = opt(str("12"));
-		List<Result> results = opt.match("123");
+		MatchResults results = opt.match("123");
 
-		Assert.assertEquals(2, results.size());
+		Assert.assertTrue(results.success());
+		Assert.assertEquals(2, results.matches.size());
 	}
 
 	@Test
-	public void testOptAbsent()
+	public void testOptAbsent() throws ParseException
 	{
 		Matcher opt = opt(str("12"));
-		List<Result> results = opt.match("132");
+		MatchResults results = opt.match("132");
 
-		Assert.assertEquals(1, results.size());
+		Assert.assertTrue(results.success());
+		Assert.assertEquals(1, results.matches.size());
 	}
 
 	@Test
-	public void testRepSuccess1()
+	public void testRepSuccess1() throws ParseException
 	{
 		Matcher rep = reps(1, 3, str("12"));
-		List<Result> results = rep.match("121212121");
+		MatchResults results = rep.match("121212121");
 
-		Assert.assertEquals(3, results.size());
-		Assert.assertEquals(2, results.get(0).rest);
-		Assert.assertEquals(4, results.get(1).rest);
-		Assert.assertEquals(6, results.get(2).rest);
+		Assert.assertTrue(results.success());
+		Assert.assertEquals(3, results.matches.size());
+		Assert.assertEquals(2, results.matches.get(0).end);
+		Assert.assertEquals(4, results.matches.get(1).end);
+		Assert.assertEquals(6, results.matches.get(2).end);
 	}
 
 	@Test
-	public void testRepSuccess2()
+	public void testRepSuccess2() throws ParseException
 	{
 		Matcher rep = reps(str("12"));
-		List<Result> results = rep.match("1212121");
+		MatchResults results = rep.match("1212121");
 
-		Assert.assertEquals(4, results.size());
-		Assert.assertEquals(0, results.get(0).rest);
-		Assert.assertEquals(2, results.get(1).rest);
-		Assert.assertEquals(4, results.get(2).rest);
-		Assert.assertEquals(6, results.get(3).rest);
+		Assert.assertTrue(results.success());
+		Assert.assertEquals(4, results.matches.size());
+		Assert.assertEquals(0, results.matches.get(0).end);
+		Assert.assertEquals(2, results.matches.get(1).end);
+		Assert.assertEquals(4, results.matches.get(2).end);
+		Assert.assertEquals(6, results.matches.get(3).end);
 	}
 
 	@Test
-	public void testRepFailure()
+	public void testRepFailure() throws ParseException
 	{
 		Matcher rep = reps(2, 3, str("123"));
-		List<Result> results = rep.match("12312123");
+		MatchResults results = rep.match("12312123");
 
-		Assert.assertTrue(results.isEmpty());
+		Assert.assertFalse(results.success());
+		Assert.assertTrue(results.matches.isEmpty());
+		Assert.assertEquals(5, results.position);
 	}
 
 	@Test

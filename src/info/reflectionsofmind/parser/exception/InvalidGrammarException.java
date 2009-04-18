@@ -1,23 +1,29 @@
 package info.reflectionsofmind.parser.exception;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.matcher.Matchers;
+import info.reflectionsofmind.parser.node.AbstractNode;
+import info.reflectionsofmind.parser.node.NamedNode;
 
 import java.util.List;
 
 public class InvalidGrammarException extends GrammarParsingException
 {
-	public InvalidGrammarException(List<Result> invalidResults)
+	private static final long serialVersionUID = 1L;
+	public final MatchResults results;
+	
+	public InvalidGrammarException(MatchResults results)
 	{
-		super("Grammar cannot be fully parsed. Longest tree:\n" + Matchers.toStringNamed(getLongestResult(invalidResults)));
+		super("Grammar cannot be fully parsed. Longest tree:\n" + Matchers.toStringNamed((NamedNode)getLongestResult(results.matches)));
+		this.results= results;
 	}
 
-	private static Result getLongestResult(List<Result> results)
+	private static AbstractNode getLongestResult(List<AbstractNode> results)
 	{
-		Result longestResult = results.get(0);
+		AbstractNode longestResult = results.get(0);
 
-		for (Result result : results)
-			if (result.rest > longestResult.rest) longestResult = result;
+		for (AbstractNode result : results)
+			if (result.end > longestResult.end) longestResult = result;
 		
 		return longestResult;
 	}

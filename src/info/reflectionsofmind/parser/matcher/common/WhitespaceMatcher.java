@@ -1,24 +1,30 @@
 package info.reflectionsofmind.parser.matcher.common;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.matcher.Matcher;
+import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.StringNode;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
-public class WhitespaceMatcher implements Matcher
+public class WhitespaceMatcher extends Matcher
 {
 	@Override
-	public List<Result> match(String input)
+	public MatchResults match(String input, int start) 
 	{
 		int len= input.length();
-		int i= 0;
+		int i= start;
 		while (i < len && Character.isWhitespace(input.charAt(i)))
 			i++;
-		if (i <= 0)
-			return Collections.<Result> emptyList();
-		return Arrays.asList(new Result(new StringNode(input.substring(0, i)), i));
+		if (i <= start)
+			return new MatchResults("Expected whitespace", start);
+		StringNode node= new StringNode(start, i, input.substring(start, i));
+		return new MatchResults(Arrays.<AbstractNode>asList(node));
+	}
+	
+	@Override
+	public String getLabel()
+	{
+		return "whitespace";
 	}
 }

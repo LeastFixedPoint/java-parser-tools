@@ -1,6 +1,7 @@
 package info.reflectionsofmind.parser.matcher;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
+import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.NamedNode;
 import info.reflectionsofmind.parser.node.Nodes;
 
@@ -14,48 +15,50 @@ public final class Matchers
 		throw new UnsupportedOperationException("Utility class");
 	}
 
-	public static List<Result> fullMatch(final Matcher matcher, final String input)
+	public static MatchResults fullMatch(final Matcher matcher, final String input) 
 	{
-		final List<Result> partResults = matcher.match(input);
-		final List<Result> fullResults = new ArrayList<Result>();
-
-		for (final Result result : partResults)
+		final MatchResults partResults = matcher.match(input, 0);
+		if (!partResults.success())
+			return partResults;
+		
+		final List<AbstractNode> fullResults = new ArrayList<AbstractNode>();
+		for (final AbstractNode match : partResults.matches)
 		{
-			if (result.rest == input.length())
+			if (match.length() == input.length())
 			{
-				fullResults.add(result);
+				fullResults.add(match);
 			}
 		}
 
-		return fullResults;
+		return new MatchResults(fullResults);
 	}
 
-	public static String toStringFull(Result result)
+	public static String toStringFull(AbstractNode node)
 	{
-		return "Matched [" + result.rest + "] symbols, tree:\n" + Nodes.toStringFull(result.node) + "\n";
+		return "Matched [" + node.length() + "] symbols, tree:\n" + Nodes.toStringFull(node) + "\n";
 	}
 
-	public static String toStringNamed(Result result)
+	public static String toStringNamed(NamedNode node)
 	{
-		return "Matched [" + result.rest + "] symbols, tree:\n" + Nodes.toStringNamed((NamedNode) result.node) + "\n";
+		return "Matched [" + node.length() + "] symbols, tree:\n" + Nodes.toStringNamed(node) + "\n";
 	}
 
-	public static String toStringFull(List<Result> results)
+	public static String toStringFull(List<AbstractNode> results)
 	{
 		StringBuilder builder = new StringBuilder();
 
-		for (Result result : results)
+		for (AbstractNode result : results)
 			builder.append(toStringFull(result));
 		
 		return builder.toString();
 	}
 
-	public static String toStringNamed(List<Result> results)
+	public static String toStringNamed(List<AbstractNode> results)
 	{
 		StringBuilder builder = new StringBuilder();
 
-		for (Result result : results)
-			builder.append(toStringNamed(result));
+		for (AbstractNode result : results)
+			builder.append(toStringNamed((NamedNode)result));
 		
 		return builder.toString();
 	}

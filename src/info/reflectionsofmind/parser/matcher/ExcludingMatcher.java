@@ -3,12 +3,12 @@
  */
 package info.reflectionsofmind.parser.matcher;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
+import info.reflectionsofmind.parser.node.AbstractNode;
 
 import java.util.Iterator;
-import java.util.List;
 
-public final class ExcludingMatcher implements Matcher
+public final class ExcludingMatcher extends Matcher
 {
 	private final Matcher[] filters;
 	private final Matcher matcher;
@@ -20,24 +20,44 @@ public final class ExcludingMatcher implements Matcher
 	}
 
 	@Override
-	public List<Result> match(final String input)
+	public MatchResults match(final String input, int start) 
 	{
-		final List<Result> results = matcher.match(input);
+		final MatchResults results = matcher.match(input, start);
+		if (!results.success())
+			return results;
 		
-		for (int i = 0; !results.isEmpty() && i < filters.length; i++)
+		for (int i = 0; i < filters.length; i++)
 		{
-			for (Iterator<Result> x= filters[i].match(input).iterator(); !results.isEmpty() && x.hasNext();) 
+			MatchResults filterResults= filters[i].match(input, start);
+			if (filterResults.success())
 			{
-				final Result xresult= x.next();
-				for (Iterator<Result> r= results.iterator(); r.hasNext();) 
+				for (Iterator<AbstractNode> x= filterResults.matches.iterator(); !results.matches.isEmpty() && x.hasNext();) 
 				{
-					Result result= r.next();
-					if (result.rest == xresult.rest)
-						r.remove();
+					final AbstractNode xresult= x.next();
+					for (Iterator<AbstractNode> r= results.matches.iterator(); r.hasNext();) 
+					{
+						AbstractNode result= r.next();
+						if (result.getText().equals(xresult.getText()))
+							r.remove();
+					}
 				}
 			}
 		}
 		
 		return results;
+	}
+	
+	@Override
+	public String getLabel()
+	{
+		String label= matcher.getLabel()+" (except ";
+		for (int i= 0; i < filters.length; i++)
+		{
+			if (0 < i)
+				label+= (i == filters.length - 1) ? ", or " : ", ";
+			label+= filters[i].getLabel();
+		}
+		label+=")";
+		return label;
 	}
 }

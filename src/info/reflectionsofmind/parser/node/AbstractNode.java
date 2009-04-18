@@ -5,19 +5,43 @@ import java.util.List;
 
 public abstract class AbstractNode
 {
-	public final String id;
+	public final String id;	
 	public final List<AbstractNode> children = new ArrayList<AbstractNode>();
-	public String text = null;
+	
+	/**
+	 * A String representation of the associated grammar element.
+	 * This text is not necessarily the same as the contents of the parsed docment.   
+	 */
+	protected final String text; 
 
-	public AbstractNode(final String id)
+	/**
+	 * The beginning position within the parsed document of the grammar element 
+	 * represented by this node
+	 */
+	public int start;
+
+	/**
+	 * The ending position, plus one, of the grammar element represented by this node in the 
+	 * original parsed document.
+	 */
+	public int end;
+	
+	public AbstractNode(final String id, final int start, final int end, String text)
 	{
+		assert start <= end;
 		this.id = id;
+		this.start= start;
+		this.end= end;
+		this.text= text;
 	}
-
-	public AbstractNode(final String id, final String text)
+	
+	public AbstractNode(final String id, final int start, final int end)
 	{
-		this(id);
-		this.text = text;
+		this(id, start, end, null);
+	}
+	
+	public int length() {
+		return end - start;
 	}
 
 	public String getText()
@@ -33,4 +57,5 @@ public abstract class AbstractNode
 
 		return builder.toString();
 	}
+	
 }

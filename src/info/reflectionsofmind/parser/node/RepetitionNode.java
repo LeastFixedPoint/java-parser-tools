@@ -2,8 +2,8 @@ package info.reflectionsofmind.parser.node;
 
 public final class RepetitionNode extends PrimitiveNode
 {
-	public RepetitionNode()
+	public RepetitionNode(int start, int end)
 	{
-		super("#REPETTION");
+		super("#REPETTION", start, end);
 	}
 }

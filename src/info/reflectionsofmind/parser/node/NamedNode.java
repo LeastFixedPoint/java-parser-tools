@@ -4,14 +4,15 @@ import java.util.List;
 
 public class NamedNode extends AbstractNode
 {
-	public NamedNode(String id)
+
+	public NamedNode(String id, int start, int end)
 	{
-		super(id);
+		super(id, start, end);
 	}
 
-	public NamedNode(String id, String text)
+	public NamedNode(String id, int start, int end, String text)
 	{
-		super(id, text);
+		super(id, start, end, text);
 	}
 
 	public List<NamedNode> getNamedChildren()

@@ -1,16 +1,18 @@
 package info.reflectionsofmind.parser.matcher.contrib;
 
 import static info.reflectionsofmind.parser.Parsers.cho;
-import static info.reflectionsofmind.parser.Parsers.longs;
+import static info.reflectionsofmind.parser.Parsers.lcho;
+import static info.reflectionsofmind.parser.Parsers.lmins;
+import static info.reflectionsofmind.parser.Parsers.lreps;
+import static info.reflectionsofmind.parser.Parsers.lseq;
 import static info.reflectionsofmind.parser.Parsers.min;
-import static info.reflectionsofmind.parser.Parsers.mins;
 import static info.reflectionsofmind.parser.Parsers.opt;
 import static info.reflectionsofmind.parser.Parsers.opts;
 import static info.reflectionsofmind.parser.Parsers.range;
 import static info.reflectionsofmind.parser.Parsers.reps;
 import static info.reflectionsofmind.parser.Parsers.seq;
 import static info.reflectionsofmind.parser.Parsers.str;
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.matcher.Matcher;
 import info.reflectionsofmind.parser.matcher.NamedMatcher;
 import info.reflectionsofmind.parser.matcher.common.BooleanMatcher;
@@ -19,21 +21,12 @@ import info.reflectionsofmind.parser.matcher.common.DoubleMatcher;
 import info.reflectionsofmind.parser.matcher.common.IntegerMatcher;
 import info.reflectionsofmind.parser.matcher.common.QuotedStringMatcher;
 import info.reflectionsofmind.parser.matcher.common.WhitespaceMatcher;
+import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.StringNode;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
-/**
- * Defines a grammer for the TURTLE RDF language.
- * @see http://www.dajobe.org/2004/01/turtle/
- * 
- * Use TurtleGrammar.getMatcher() to get a matcher for parsing a Turtle RDF document.
- * 
- * @author Ted Stockwell [emorning@yahoo.com]
- */
 public class TurtleGrammar
 {
 	/**
@@ -43,7 +36,7 @@ public class TurtleGrammar
 	public static final String STATEMENT = "statement";
 	public static final String DIRECTIVE = "directive";
 	public static final String TRIPLES = "triples";
-	public static final String PREDICATE_OBJECT_LIST = "predicateObjectList";
+	public static final String PREDICATE_VALUES = "predicateValues";
 	public static final String VERB = "verb";
 	public static final String OBJECT_LIST = "objectList";
 	public static final String OBJECT = "object";
@@ -63,44 +56,134 @@ public class TurtleGrammar
 	public static final String NODE_ID = "nodeID";
 	public static final String QNAME = "qname";
 	public static final String QUOTED_STRING = "quotedString";
+	
+	static final String UTF8= "UTF-8";
 
-	public static class URIRefMatcher implements Matcher 
+	public static class URIRefMatcher extends Matcher 
 	{
 		@Override 
-		public List<Result> match(String input)
+		public MatchResults match(String input, int start)
 		{
-			if (input.length() <= 0 || input.charAt(0) != '<')
-				return Collections.<Result> emptyList();
+			if (input.length() <= start || input.charAt(start) != '<')
+				return new MatchResults("Expected '<'", start);
 			
-			int pos = input.indexOf('>', 1);
+			int pos = input.indexOf('>', start);
 			if (pos < 0)
-				return Collections.<Result> emptyList();
+				return new MatchResults("Expected end of URI reference", start);
 			
 			pos++;
-			String text= input.substring(0, pos);
-			return Arrays.asList(new Result(new StringNode(text), pos));
+			StringNode node= new StringNode(start, pos, input.substring(start, pos));
+			return new MatchResults(Arrays.<AbstractNode>asList(node));
+		}
+		
+		@Override
+		public String getLabel()
+		{
+			return "URI reference";
 		}
 	}
 	
-	public static class NameMatcher implements Matcher 
+	public static class NameMatcher extends Matcher 
 	{
 		@Override 
-		public List<Result> match(String input)
+		public MatchResults match(String input, int start)
 		{
-			int len= input.length();
-			if (len <= 0)
-				return Collections.<Result> emptyList();
-			char ch= input.charAt(0);
-			if (!Character.isLetter(ch) || Character.isWhitespace(ch))
-				return Collections.<Result> emptyList();
-			int i= 1;
-			for (; i < len; i++) {
-				ch= input.charAt(i);
-				if (!Character.isLetterOrDigit(ch) || Character.isWhitespace(ch))
-					if (ch != '-')
+				char[] cs= input.toCharArray();
+				if (cs.length <= start)
+					return new MatchResults("A name must have at least one letter", start);
+				if (!isNameStartChar(cs[start]))
+					return new MatchResults("Not a valid name start charaacter", start);
+
+				int i= start+1;
+				for (; i < cs.length; i++) {
+					if (!isNameChar(cs[i]))
 						break;
-			}
-			return Arrays.asList(new Result(new StringNode(input.substring(0, i)), i));
+				}
+				StringNode node= new StringNode(start, i, input.substring(start, i));
+				return new MatchResults(Arrays.<AbstractNode>asList(node));
+		}
+		
+		@Override
+		public String getLabel()
+		{
+			return "name";
+		}
+		
+		static boolean isNameStartChar(char c) {
+
+			if ('A' <= c && c <= 'Z')
+				return true;
+
+			if ('a' <= c && c <= 'z')
+				return true;
+
+			if (c == '_')
+				return true;
+
+			if (0x00C0 <= c && c <= 0x00D6)
+				return true;
+
+			if (0x00D8 <= c && c <= 0x00F6)
+				return true;
+
+			if (0x00F8 <= c && c <= 0x02FF)
+				return true;
+
+			if (0x0370 <= c && c <= 0x037D)
+				return true;
+
+			if (0x037F <= c && c <= 0x1FFF)
+				return true;
+			
+			if (0x200C <= c && c <= 0x200D)
+				return true;
+
+			if (0x2070 <= c && c <= 0x218F)
+				return true;
+
+			if (0x2C00 <= c && c <= 0x2FEF)
+				return true;
+
+			if (0x3001 <= c && c <= 0xD7FF)
+				return true;
+
+			if (0xF900 <= c && c <= 0xFDCF)
+				return true;
+
+			if (0xFDF0 <= c && c <= 0xFFFD)
+				return true;
+
+			if (0x10000 <= c && c <= 0xEFFFF)
+				return true;
+			
+			return false;
+
+		}
+		
+		static boolean isNameChar(char c) 
+		{
+			if (isNameStartChar(c))
+				return true;
+
+			if (0xFDF0 <= c && c <= 0xFFFD)
+				return true;
+
+			if ('0' <= c && c <= '9')
+				return true;
+
+			if ('-' == c)
+				return true;
+
+			if (0x00B7 == c)
+				return true;
+
+			if (0x0300 <= c && c <= 0x036F)
+				return true;
+
+			if (0x203F <= c && c <= 0x2040)
+				return true;
+			
+			return false;
 		}
 	}
 	
@@ -116,7 +199,7 @@ public class TurtleGrammar
 		Matcher name= new NameMatcher();
 		
 		NamedMatcher quotedString= defineMatcher(QUOTED_STRING, new QuotedStringMatcher());
-		NamedMatcher qname= defineMatcher(QNAME, longs(opt(name), str(":"), opt(name)));
+		NamedMatcher qname= defineMatcher(QNAME, lseq(opt(name), str(":"), opt(name)));
 		NamedMatcher nodeID= defineMatcher(NODE_ID, seq(str("_:"), name));
 		NamedMatcher prefixName= defineMatcher(PREFIX_NAME, name);
 		NamedMatcher uriref= defineMatcher(URIREF, new URIRefMatcher());
@@ -132,13 +215,13 @@ public class TurtleGrammar
 		NamedMatcher language= defineMatcher(LANGUAGE, seq(min(1, lower), reps(str("-"), min(1, seq(cho(lower, digit))))));
 		NamedMatcher literal= defineMatcher(LITERAL, cho(seq(quotedString, opts(str("@"), language)), datatypeString, integer, doubl, decimal, bool));
 		NamedMatcher object= defineMatcher(OBJECT, cho(resource, literal, nodeID, str("[]")));
-		NamedMatcher objectList= defineMatcher(OBJECT_LIST, seq(object, reps(optws, str(","), optws, object)));
-		NamedMatcher verb= defineMatcher(VERB, cho(resource, str("a")));
-		NamedMatcher predicateObjectList= defineMatcher(PREDICATE_OBJECT_LIST, longs(verb, ws, objectList, reps(optws, str(";"), optws, verb, ws, objectList)));
-		NamedMatcher triples= defineMatcher(TRIPLES, seq(subject, ws, predicateObjectList));
+		NamedMatcher objectList= defineMatcher(OBJECT_LIST, seq(object, lreps(optws, str(","), optws, object)));
+		NamedMatcher verb= defineMatcher(VERB, lcho(resource, str("a")));
+		NamedMatcher predicateValues= defineMatcher(PREDICATE_VALUES, seq(verb, ws, objectList));
+		NamedMatcher triples= defineMatcher(TRIPLES, seq(subject, ws, predicateValues, lreps(optws, str(";"), optws, predicateValues)));
 		NamedMatcher directive= defineMatcher(DIRECTIVE, cho(prefixID, base));
-		NamedMatcher statement= defineMatcher(STATEMENT, cho(seq(directive, optws, str(".")), seq(triples, optws, str("."))));
-		defineMatcher(DOCUMENT, longs(mins(1, optws, statement), optws));
+		NamedMatcher statement= defineMatcher(STATEMENT, seq(cho(directive, triples), optws, str(".")));
+		defineMatcher(DOCUMENT, seq(optws, lmins(1, statement, optws)));
 	}
 	
 	private static NamedMatcher defineMatcher(String symbol, Matcher definition) {

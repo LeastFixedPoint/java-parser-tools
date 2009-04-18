@@ -2,8 +2,8 @@ package info.reflectionsofmind.parser.node;
 
 public final class OptionalNode extends PrimitiveNode
 {
-	public OptionalNode()
+	public OptionalNode(int start, int end)
 	{
-		super("#OPTIONAL");
+		super("#OPTIONAL", start, end);
 	}
 }

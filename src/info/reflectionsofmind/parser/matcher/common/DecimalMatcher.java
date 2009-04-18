@@ -1,42 +1,52 @@
 package info.reflectionsofmind.parser.matcher.common;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.matcher.Matcher;
+import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.StringNode;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 public class DecimalMatcher
-implements Matcher
+extends Matcher
 {
 	static final private IntegerMatcher __integerMatcher= new IntegerMatcher();
 	//decimal ::= ([sign] ((digits "." {digits}) | ("." digits) | digits)) 
 	@Override
-	public List<Result> match(String input)
+	public MatchResults match(String input, int start) 
 	{
-		int i;
-		List<Result> integers= __integerMatcher.match(input);
-		if (integers.isEmpty()) {
-			if ('.' != input.charAt(0)) 
-				return Collections.<Result> emptyList();
-			integers= __integerMatcher.match(input.substring(1));
-			if (integers.isEmpty()) 
-				return Collections.<Result> emptyList();
-			i= integers.get(0).rest+1;
+		int i= start;
+		MatchResults integers= __integerMatcher.match(input, i);
+		if (integers.matches.isEmpty()) 
+		{
+			if ('.' == input.charAt(0))
+			{
+				integers= __integerMatcher.match(input, start + 1);
+				if (!integers.matches.isEmpty()) 
+					i= integers.matches.get(0).end;
+			}
 		}
-		else {
-			i= integers.get(0).rest;
-			if ('.' == input.charAt(0)) {
-				i++;
-				
-				integers= __integerMatcher.match(input.substring(i));
-				if (!integers.isEmpty()) 
-					i+= integers.get(0).rest;
+		else 
+		{
+			i= integers.matches.get(0).end;
+			if ('.' == input.charAt(i)) 
+			{
+				integers= __integerMatcher.match(input, ++i);
+				if (!integers.matches.isEmpty()) 
+					i= integers.matches.get(0).end;
 			}
 		}
 		
-		return Arrays.asList(new Result(new StringNode(input.substring(0, i)), i));
+		if (i == start)
+			return new MatchResults("Expected a double", start);
+		
+		StringNode node= new StringNode(start, i, input.substring(start, i));
+		return new MatchResults(Arrays.<AbstractNode>asList(node));
+	}
+	
+	@Override
+	public String getLabel()
+	{
+		return "decimal";
 	}
 }

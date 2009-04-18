@@ -1,31 +1,43 @@
 package info.reflectionsofmind.parser.matcher.common;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.matcher.Matcher;
+import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.StringNode;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 public class IntegerMatcher
-implements Matcher
+extends Matcher
 {
 	@Override
-	public List<Result> match(String input)
+	public MatchResults match(String input, int start) 
 	{
-		if (input.length() <= 0)
-			return Collections.<Result> emptyList();
+		int i= start;
+		if (start < input.length())
+		{
+			char c= input.charAt(start);
+			int f= (c == '+' || c == '-') ? 1 : 0;
+			
+			if (Character.isDigit(input.charAt(f)))
+			{
+				i+= f + 1;
+				while (Character.isDigit(input.charAt(i)))
+					i++;
+			}
+		}
 		
-		char c= input.charAt(0);
-		int i= (c == '+' || c == '-') ? 1 : 0;
+		if (i == start)
+			return new MatchResults("Expected an integer", start);
 		
-		if (!Character.isDigit(input.charAt(i++)))
-			return Collections.<Result> emptyList();
 		
-		while (Character.isDigit(input.charAt(i)))
-			i++;
-		
-		return Arrays.asList(new Result(new StringNode(input.substring(0, i)), i));
+		StringNode node= new StringNode(start, i, input.substring(0, i));
+		return new MatchResults(Arrays.<AbstractNode>asList(node));
+	}
+	
+	@Override
+	public String getLabel()
+	{
+		return "integer";
 	}
 }

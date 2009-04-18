@@ -1,10 +1,15 @@
 package info.reflectionsofmind.parser.matcher;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
 
-import java.util.List;
-
-public interface Matcher
+public abstract class Matcher
 {
-	List<Result> match(String input);
+	abstract public MatchResults match(String input, int start);
+	
+	public MatchResults match(String input) 
+	{
+		return match(input, 0);
+	}
+	
+	abstract public String getLabel();
 }

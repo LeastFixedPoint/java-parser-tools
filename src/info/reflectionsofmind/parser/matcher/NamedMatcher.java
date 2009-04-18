@@ -1,15 +1,15 @@
 package info.reflectionsofmind.parser.matcher;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.NamedNode;
 
-public class NamedMatcher implements Matcher
+import java.util.ArrayList;
+import java.util.List;
+
+public class NamedMatcher extends Matcher
 {
-	private final String id;
+	public final String id;
 	private Matcher definition;
 
 	public NamedMatcher(String id)
@@ -24,17 +24,26 @@ public class NamedMatcher implements Matcher
 	}
 	
 	@Override
-	public List<Result> match(String input)
+	public MatchResults match(String input, int start) 
 	{
-		List<Result> results = new ArrayList<Result>();
-		
-		for (Result result : this.definition.match(input))
+		List<AbstractNode> results = new ArrayList<AbstractNode>();
+
+		MatchResults matchResults= this.definition.match(input, start);
+		if (!matchResults.success())
+			return matchResults;
+
+		for (AbstractNode result : matchResults.matches)
 		{
-			final AbstractNode node = new NamedNode(this.id);
-			node.children.add(result.node);
-			results.add(new Result(node, result.rest));
+			final AbstractNode node = new NamedNode(this.id, start, result.end);
+			node.children.add(result);
+			results.add(node);
 		}
-		
-		return results;
+		return new MatchResults(results);
+	}
+	
+	@Override
+	public String getLabel()
+	{
+		return id;
 	}
 }

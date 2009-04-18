@@ -1,6 +1,8 @@
 package info.reflectionsofmind.parser;
 
 import static info.reflectionsofmind.parser.Parsers.cho;
+import static info.reflectionsofmind.parser.Parsers.lrepc;
+import static info.reflectionsofmind.parser.Parsers.lreps;
 import static info.reflectionsofmind.parser.Parsers.minc;
 import static info.reflectionsofmind.parser.Parsers.mins;
 import static info.reflectionsofmind.parser.Parsers.opt;
@@ -26,7 +28,6 @@ import info.reflectionsofmind.parser.node.Nodes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,14 +36,15 @@ public class Grammar
 {
 	public static final Matcher GRAMMAR;
 
-	public static Matcher generate(final String grammarCode, final String rootDefinition) throws GrammarParsingException
+	public static Matcher generate(final String grammarCode, final String rootDefinition) 
+	throws GrammarParsingException
 	{
-		final List<Result> results = Matchers.fullMatch(GRAMMAR, grammarCode);
+		final MatchResults results = Matchers.fullMatch(GRAMMAR, grammarCode);
 
-		if (results.size() > 1) throw new AmbiguousGrammarException(results);
-		if (results.isEmpty()) throw new InvalidGrammarException(GRAMMAR.match(grammarCode));
+		if (results.matches.size() <= 0) throw new InvalidGrammarException(results);
+		if (results.matches.size() > 1) throw new AmbiguousGrammarException(results.matches);
 
-		final NamedNode grammar = (NamedNode) results.get(0).node;
+		final NamedNode grammar = (NamedNode) results.matches.get(0);
 		final Map<String, NamedMatcher> definitions = new HashMap<String, NamedMatcher>();
 
 		for (final NamedNode definition : grammar.getNamedChildren())
@@ -59,7 +61,7 @@ public class Grammar
 		}
 
 		// check for undefined identifiers
-		List<AbstractNode> identifierNodes= Navigation.findAllDecendentsById(grammar, "identifier");
+		List<AbstractNode> identifierNodes= Navigation.findAllById(grammar, "identifier");
 		for (AbstractNode identifierNode : identifierNodes) 
 		{
 			String identifier= identifierNode.getText();
@@ -118,7 +120,7 @@ public class Grammar
 		final Matcher alpha = cho(lower, upper);
 		final Matcher digit = range('0', '9');
 
-		final Matcher normalWord = seq(alpha, repc(digit, alpha));
+		final Matcher normalWord = seq(alpha, lrepc(digit, alpha));
 		final NamedMatcher anyLower = new NamedMatcher("anyLower").define(str("%lower%"));
 		final NamedMatcher anyUpper = new NamedMatcher("anyUpper").define(str("%upper%"));
 		final NamedMatcher anyAlpha = new NamedMatcher("anyAlpha").define(str("%alpha%"));
@@ -158,20 +160,29 @@ public class Grammar
 		string.define(new Matcher()
 		{
 			@Override
-			public List<Result> match(String input)
+			public MatchResults match(String input, int start)
 			{
-				int pos = input.indexOf('"');
+				int pos = input.indexOf('"', start);
+				if (pos < 0)
+					return new MatchResults("Expected beginning of quote", start);
 				while (pos > 0 && input.charAt(pos - 1) == '\'')
 					pos = input.indexOf('"', pos+1);
 
-				if (pos == -1) return Collections.<Result> emptyList();
+				if (pos == -1) 
+					return new MatchResults("Expected end of quote started at position "+start, input.length());
 				
-				String text= input.substring(0, pos).replaceAll("\'\"", "\"");
-				return Arrays.asList(new Result(new NamedNode("string", text), pos));
+				String text= input.substring(start, pos).replaceAll("\'\"", "\"");
+				return new MatchResults(Arrays.<AbstractNode>asList(new NamedNode("string", start, pos, text)));
+			}
+			
+			@Override
+			public String getLabel()
+			{
+				return "quoted string";
 			}
 		});
 
-		identifier.define(seq(normalWord, reps(str("-"), normalWord)));
+		identifier.define(seq(normalWord, lreps(str("-"), normalWord)));
 		definition.define(seq(identifier, optwh, str("::="), optwh, expression));
 
 		expression.define(cho( //

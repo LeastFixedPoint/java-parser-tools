@@ -1,29 +1,42 @@
 package info.reflectionsofmind.parser.matcher.common;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.matcher.Matcher;
+import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.StringNode;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 public class BooleanMatcher
-implements Matcher
+extends Matcher
 {
+	static final String T= "true";
+	static final String F= "false";
+	
 	@Override
-	public List<Result> match(String input)
+	public MatchResults match(String input, int start) 
 	{
-		int i= 0;
-		if (input.startsWith("true")) {
-			i= 4;
+		String s= null;
+		if (start < input.length())
+		{
+			String string= input.substring(start);
+			if (string.startsWith(T)) {
+				s= T;
+			}
+			else if (string.startsWith(F))
+				s= F;
 		}
-		else if (input.startsWith("false"))
-			i= 5;
 
-		if (i <= 0) 
-			return Collections.<Result> emptyList();
+		if (s == null) 
+			return new MatchResults("Expected 'true' or 'false'", start);
 
-		return Arrays.asList(new Result(new StringNode(input.substring(0, i)), i));
+		StringNode node= new StringNode(start, start+s.length(), s);
+		return new MatchResults(Arrays.<AbstractNode>asList(node));
+	}
+	
+	@Override
+	public String getLabel()
+	{
+		return "boolean";
 	}
 }

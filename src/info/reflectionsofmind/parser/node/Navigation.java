@@ -10,7 +10,7 @@ public class Navigation
 	/**
 	 * @return first found node with denoted id.  Returns null if not found.
 	 */
-	public static AbstractNode findDecendentById(AbstractNode root, String id)
+	public static AbstractNode findById(AbstractNode root, String id)
 	{
 		List<AbstractNode> todo = new ArrayList<AbstractNode>();
 		HashSet<AbstractNode> done = new HashSet<AbstractNode>();
@@ -31,7 +31,7 @@ public class Navigation
 		return null;
 	}	
 
-	public static List<AbstractNode> findAllDecendentsById(AbstractNode root, String id)
+	public static List<AbstractNode> findAllById(AbstractNode root, String id)
 	{
 		List<AbstractNode> matches = new ArrayList<AbstractNode>();
 		List<AbstractNode> todo = new ArrayList<AbstractNode>();

@@ -3,14 +3,13 @@
  */
 package info.reflectionsofmind.parser.matcher;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
+import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.StringNode;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
-public final class RangeMatcher implements Matcher
+public final class RangeMatcher extends Matcher
 {
 	private final char to;
 	private final char from;
@@ -22,15 +21,24 @@ public final class RangeMatcher implements Matcher
 	}
 
 	@Override
-	public List<Result> match(final String input)
+	public MatchResults match(final String input, int start) 
 	{
-		if (input.isEmpty()) return Collections.<Result> emptyList();
-
-		for (char ch = from; ch < to; ch++)
+		if (start < input.length()) 
 		{
-			if (input.charAt(0) == ch) return Arrays.asList(new Result(new StringNode("" + ch), 1));
+			char c= input.charAt(start);
+			for (char ch = from; ch < to; ch++)
+			{
+				if (c == ch) 
+					return new MatchResults(Arrays.<AbstractNode>asList(new StringNode(start, start+1, "" + ch)));
+			}
 		}
-
-		return Collections.<Result> emptyList();
+		
+		return new MatchResults("Expected : "+getLabel(), start);
+	}
+	
+	@Override
+	public String getLabel()
+	{
+		return "character in range ["+to+"-"+from+"]";
 	}
 }

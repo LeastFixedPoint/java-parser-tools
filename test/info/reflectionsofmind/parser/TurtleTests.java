@@ -3,7 +3,7 @@ package info.reflectionsofmind.parser;
 import static info.reflectionsofmind.parser.matcher.contrib.TurtleGrammar.DOCUMENT;
 import static info.reflectionsofmind.parser.matcher.contrib.TurtleGrammar.LITERAL;
 import static info.reflectionsofmind.parser.matcher.contrib.TurtleGrammar.OBJECT_LIST;
-import static info.reflectionsofmind.parser.matcher.contrib.TurtleGrammar.PREDICATE_OBJECT_LIST;
+import static info.reflectionsofmind.parser.matcher.contrib.TurtleGrammar.PREDICATE_VALUES;
 import static info.reflectionsofmind.parser.matcher.contrib.TurtleGrammar.STATEMENT;
 import static info.reflectionsofmind.parser.matcher.contrib.TurtleGrammar.SUBJECT;
 import static info.reflectionsofmind.parser.matcher.contrib.TurtleGrammar.TRIPLES;
@@ -33,50 +33,62 @@ extends TestCase
 			"			resource:description \"A Customer defined in a Meteor manifest\" .\n\n\n\n\n";
 		
 		Matcher literalMatcher= TurtleGrammar.getMatcher(LITERAL);		
-		Assert.assertEquals(1, literalMatcher.match("\"A Customer defined in a Meteor manifest\"").size());
+		Assert.assertEquals(1, literalMatcher.match("\"A Customer defined in a Meteor manifest\"").matches.size());
 		
 		String testgrammar= "uriref ::= (\"<\" relativeURI \">\")\n" +
 				"relativeURI ::= (anychar {anychar})\n" +
 				"anychar ::= (%alpha% | %digit% | \" \" | \":\" | \".\")";  
 		Matcher relativeURIMatcher= Grammar.generate(testgrammar, "relativeURI");		
-		Assert.assertEquals(1, Matchers.fullMatch(relativeURIMatcher, "meteor:net.sf.meteor.TestBindType.instance").size());
+		Assert.assertEquals(1, Matchers.fullMatch(relativeURIMatcher, "meteor:net.sf.meteor.TestBindType.instance").matches.size());
 		
 		Matcher urirefMatcher= TurtleGrammar.getMatcher(URIREF);		
-		Assert.assertEquals(1, urirefMatcher.match("<meteor:net.sf.meteor.TestBindType.instance>").size());
+		Assert.assertEquals(1, urirefMatcher.match("<meteor:net.sf.meteor.TestBindType.instance>").matches.size());
 		
 		Matcher subjectMatcher= TurtleGrammar.getMatcher(SUBJECT);		
-		Assert.assertEquals(1, subjectMatcher.match("<meteor:net.sf.meteor.TestBindType.instance>").size());
-		Assert.assertEquals(1, subjectMatcher.match("test:CustomerFromManifest").size());
+		Assert.assertEquals(1, subjectMatcher.match("<meteor:net.sf.meteor.TestBindType.instance>").matches.size());
+		Assert.assertEquals(1, subjectMatcher.match("test:CustomerFromManifest").matches.size());
 		
 		Matcher verbMatcher= TurtleGrammar.getMatcher(VERB);	
-		Assert.assertEquals(1, verbMatcher.match("resource:type").size());
+		Assert.assertEquals(1, verbMatcher.match("resource:type").matches.size());
 		
 		Matcher objectListMatcher= TurtleGrammar.getMatcher(OBJECT_LIST);		
-		Assert.assertEquals(1, objectListMatcher.match("webbench:WebbenchModule").size());
+		Assert.assertEquals(1, objectListMatcher.match("webbench:WebbenchModule").matches.size());
 		
-		Matcher predicateObjectListMatcher= TurtleGrammar.getMatcher(PREDICATE_OBJECT_LIST);		
-		Assert.assertEquals(1, predicateObjectListMatcher.match("resource:type webbench:WebbenchModule").size());
-		Assert.assertEquals(1, predicateObjectListMatcher.match("resource:description \"A Customer defined in a Meteor manifest\"").size());
-		Assert.assertEquals(1, predicateObjectListMatcher.match("resource:type test:Customer ;\n\t\t\tresource:description \"A Customer defined in a Meteor manifest\"").size());
+		Matcher valuesMatcher= TurtleGrammar.getMatcher(PREDICATE_VALUES);		
+		Assert.assertEquals(1, valuesMatcher.match("resource:type webbench:WebbenchModule").matches.size());
+		Assert.assertEquals(1, valuesMatcher.match("resource:description \"A Customer defined in a Meteor manifest\"").matches.size());
+		Assert.assertEquals(1, valuesMatcher.match("resource:type test:Customer ;\n\t\t\tresource:description \"A Customer defined in a Meteor manifest\"").matches.size());
 		
 		Matcher triplesMatcher= TurtleGrammar.getMatcher(TRIPLES);
 		String tripleDoc= "<meteor:net.sf.meteor.TestBindType.instance> resource:type webbench:WebbenchModule"; 
-		Assert.assertEquals(1, triplesMatcher.match(tripleDoc).size());
+		Assert.assertEquals(1, triplesMatcher.match(tripleDoc).matches.size());
 		tripleDoc= "test:CustomerFromManifest resource:type test:Customer ;\n\t\t\tresource:description \"A Customer defined in a Meteor manifest\"";
-		Assert.assertEquals(1, triplesMatcher.match(tripleDoc).size());
+		Assert.assertEquals(1, triplesMatcher.match(tripleDoc).matches.size());
 		
 		Matcher statementMatcher= TurtleGrammar.getMatcher(STATEMENT);
-		String statementDoc= tripleDoc+" .\n\n\n\n\n"; 
-		Assert.assertEquals(1, statementMatcher.match(statementDoc).size());
+		String statementDoc= tripleDoc+" ."; 
+		Assert.assertEquals(1, statementMatcher.match(statementDoc).matches.size());
 		
 		Matcher matcher= TurtleGrammar.getMatcher(DOCUMENT);		
-		List<Result> results= matcher.match(document);
-		Assert.assertEquals(1, results.size());
-		AbstractNode rootNode= results.get(0).node;
+		MatchResults results= matcher.match(document);
+		Assert.assertEquals(1, results.matches.size());
+		AbstractNode rootNode= results.matches.get(0);
 		
 		// the AST should have 3 statements in it
-		List<AbstractNode> statements= Navigation.findAllDecendentsById(rootNode, "statement");
+		List<AbstractNode> statements= Navigation.findAllById(rootNode, "statement");
 		Assert.assertEquals(3, statements.size());
+		
+		
+		document= "@prefix meteor: <meteor:net.sf.meteor.> .\n" +
+				"@prefix jdbc: <meteor:net.sf.meteor.storage.jdbc.> .\n" +
+				"@prefix h2: <meteor:net.sf.meteor.library.h2.> .\n\n" +
+				"h2:H2Driver meteor:Resource.type jdbc:JDBCDriverDescriptor ;\n" +
+				"jdbc:JDBCDriverDescriptor.protocol \"jdbc:h2\" ;\n" +
+				"jdbc:JDBCDriverDescriptor.driverClass \"org.h2.Driver\" .\n\n\n\n\n\n\n"; 
+		results= Matchers.fullMatch(matcher, document);
+		Assert.assertEquals(0, results.matches.size());
+		
+		
 	}
 	
 }

@@ -3,8 +3,8 @@
  */
 package info.reflectionsofmind.parser.matcher;
 
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.Parsers;
-import info.reflectionsofmind.parser.Result;
 import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.SequenceNode;
 
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class SequenceMatcher implements Matcher
+public final class SequenceMatcher extends Matcher
 {
 	private final Matcher[] matchers;
 
@@ -22,29 +22,49 @@ public final class SequenceMatcher implements Matcher
 	}
 
 	@Override
-	public List<Result> match(final String input)
+	public MatchResults match(final String input, int start) 
 	{
-		if (matchers.length == 0) return Arrays.asList(new Result(new SequenceNode(), 0));
+		if (matchers.length == 0) 
+			return new MatchResults(Arrays.<AbstractNode>asList(new SequenceNode(start, start)));
+		
+		final List<AbstractNode> combinedResults = new ArrayList<AbstractNode>();
 
-		final List<Result> results = matchers[0].match(input);
-		final List<Result> combinedResults = new ArrayList<Result>();
+		MatchResults results= matchers[0].match(input, start);
+		if (!results.success())
+			return results;
 
-		for (final Result result : results)
+		MatchResults err= null;
+		for (final AbstractNode result : results.matches)
 		{
-			if (result.node != null)
+			MatchResults subResults= Parsers.seq(Parsers.tail(matchers)).match(input, result.end);
+			if (!subResults.success() && err == null)
+				err= subResults;
+			for (final AbstractNode subResult : subResults.matches)
 			{
-				List<Result> subResults= Parsers.seq(Parsers.tail(matchers)).match(input.substring(result.rest));
-				for (final Result subResult : subResults)
-				{
-					final AbstractNode node = new SequenceNode();
-					node.children.add(result.node);
-					node.children.addAll(subResult.node.children);
+				final AbstractNode node = new SequenceNode(start, subResult.end);
+				node.children.add(result);
+				node.children.addAll(subResult.children);
 
-					combinedResults.add(new Result(node, result.rest + subResult.rest));
-				}
+				combinedResults.add(node);
 			}
 		}
+		
+		if (combinedResults.isEmpty() && err != null)
+			return err;
 
-		return combinedResults;
+		return new MatchResults(combinedResults);
+	}
+
+	@Override
+	public String getLabel()
+	{
+		String label= "sequence of : ";
+		for (int i= 0; i < matchers.length; i++)
+		{
+			if (0 < i)
+				label+= ", ";
+			label+= matchers[i].getLabel();
+		}
+		return label;
 	}
 }

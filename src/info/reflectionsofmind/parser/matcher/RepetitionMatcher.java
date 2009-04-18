@@ -3,15 +3,15 @@
  */
 package info.reflectionsofmind.parser.matcher;
 
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.Parsers;
-import info.reflectionsofmind.parser.Result;
 import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.RepetitionNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class RepetitionMatcher implements Matcher
+public final class RepetitionMatcher extends Matcher
 {
 	public enum Type
 	{
@@ -48,9 +48,9 @@ public final class RepetitionMatcher implements Matcher
 	}
 
 	@Override
-	public List<Result> match(final String input)
+	public MatchResults match(final String input, int start) 
 	{
-		final List<Result> combinedResults = new ArrayList<Result>();
+		final List<AbstractNode> combinedResults = new ArrayList<AbstractNode>();
 
 		final List<Matcher> repetition = new ArrayList<Matcher>();
 
@@ -59,29 +59,31 @@ public final class RepetitionMatcher implements Matcher
 			repetition.add(matcher);
 		}
 
-		final List<Result> results = Parsers.seq(repetition.toArray(new Matcher[] {})).match(input);
+		MatchResults results= Parsers.seq(repetition.toArray(new Matcher[] {})).match(input, start);
+		if (!results.success())
+			return results;
 
-		for (final Result result : results)
+		for (final AbstractNode result : results.matches)
 		{
-			final AbstractNode node = new RepetitionNode();
-			node.children.addAll(result.node.children);
-			combinedResults.add(new Result(node, result.rest));
+			final AbstractNode node = new RepetitionNode(start, result.end);
+			node.children.addAll(result.children);
+			combinedResults.add(node);
 		}
 
 		for (int i = 1; i <= max - min; i++)
 		{
-			final List<Result> combinedSubResults = new ArrayList<Result>();
+			final List<AbstractNode> combinedSubResults = new ArrayList<AbstractNode>();
 
-			for (final Result result : results)
+			for (final AbstractNode result : results.matches)
 			{
-				final List<Result> subResults = Parsers.reps(i, i, matcher).match(input.substring(result.rest));
+				final MatchResults subResults = Parsers.reps(i, i, matcher).match(input, result.end);
 
-				for (final Result subResult : subResults)
+				for (final AbstractNode subResult : subResults.matches)
 				{
-					final AbstractNode node = new RepetitionNode();
-					node.children.addAll(result.node.children);
-					node.children.addAll(subResult.node.children);
-					combinedSubResults.add(new Result(node, result.rest + subResult.rest));
+					final AbstractNode node = new RepetitionNode(start, subResult.end);
+					node.children.addAll(result.children);
+					node.children.addAll(subResult.children);
+					combinedSubResults.add(node);
 				}
 			}
 
@@ -95,6 +97,24 @@ public final class RepetitionMatcher implements Matcher
 			}
 		}
 
-		return combinedResults;
+		return new MatchResults(combinedResults);
+	}
+	
+	@Override
+	public String getLabel()
+	{
+		String label= "";
+		if (0 < min)
+			label+= "at least "+min+" repetitions";
+		if (max < Integer.MAX_VALUE)
+		{
+			if (0 < label.length())
+				label+=" but ";
+			label+= "no more than "+max+" repetitions";
+		}
+		if (0 < label.length())
+			label+= " of ";
+		label+= matcher.getLabel();
+		return label;
 	}
 }

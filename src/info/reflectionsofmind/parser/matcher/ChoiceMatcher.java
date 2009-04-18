@@ -3,16 +3,16 @@
  */
 package info.reflectionsofmind.parser.matcher;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.MatchResults;
 import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.ChoiceNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ChoiceMatcher implements Matcher
+public class ChoiceMatcher extends Matcher
 {
-	private final Matcher[] matchers;
+	protected final Matcher[] matchers;
 
 	public ChoiceMatcher(Matcher[] matchers)
 	{
@@ -20,20 +20,39 @@ public final class ChoiceMatcher implements Matcher
 	}
 
 	@Override
-	public List<Result> match(final String input)
+	public MatchResults match(final String input, int start) 
 	{
-		final List<Result> combinedResults = new ArrayList<Result>();
-
+		final List<AbstractNode> combinedResults = new ArrayList<AbstractNode>();
+		
 		for (int i = 0; i < matchers.length; i++)
 		{
-			for (final Result result : matchers[i].match(input))
+			MatchResults results= matchers[i].match(input, start);
+			if (results.success())
 			{
-				final AbstractNode node = new ChoiceNode(i);
-				node.children.add(result.node);
-				combinedResults.add(new Result(node, result.rest));
+				for (final AbstractNode result : results.matches)
+				{
+					final AbstractNode node = new ChoiceNode(i, start, result.end);
+					node.children.add(result);
+					combinedResults.add(node);
+				}
 			}
 		}
+		
+		if (combinedResults.isEmpty()) 
+			return new MatchResults("Expected "+getLabel(), start);
 
-		return combinedResults;
+		return new MatchResults(combinedResults);
+	}
+
+	public String getLabel()
+	{
+		String label= "one of the following: ";
+		for (int i= 0; i < matchers.length; i++)
+		{
+			if (0 < i)
+				label+= (i == matchers.length - 1) ? ", or " : ", ";
+			label+= matchers[i].getLabel();
+		}
+		return label;
 	}
 }

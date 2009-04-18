@@ -4,9 +4,9 @@ public final class ChoiceNode extends PrimitiveNode
 {
 	private final int choiceIndex;
 	
-	public ChoiceNode(int choiceIndex)
+	public ChoiceNode(int choiceIndex, int start, int end)
 	{
-		super("#CHOICE[" + choiceIndex + "]");
+		super("#CHOICE[" + choiceIndex + "]", start, end);
 		this.choiceIndex = choiceIndex;
 	}
 	

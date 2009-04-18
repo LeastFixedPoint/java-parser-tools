@@ -2,8 +2,8 @@ package info.reflectionsofmind.parser.node;
 
 public final class SequenceNode extends PrimitiveNode
 {
-	public SequenceNode()
+	public SequenceNode(int start, int end)
 	{
-		super("#SEQUENCE");
+		super("#SEQUENCE", start, end);
 	}
 }

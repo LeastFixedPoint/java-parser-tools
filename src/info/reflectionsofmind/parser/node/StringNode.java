@@ -2,14 +2,9 @@ package info.reflectionsofmind.parser.node;
 
 public final class StringNode extends PrimitiveNode
 {
-	public StringNode()
+	public StringNode(int start, int end, String text)
 	{
-		super("#STRING");
+		super("#STRING", start, end, text);
 	}
 	
-	public StringNode(String text)
-	{
-		this();
-		this.text = text;
-	}
 }
