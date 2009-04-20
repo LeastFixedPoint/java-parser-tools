@@ -24,6 +24,9 @@ public class LongestMatcher extends ChoiceMatcher
 		
 		for (int i = 0; i < matchers.length; i++)
 		{
+			MatchResults matchResults= matchers[i].match(input, start);
+			if (!matchResults.success())
+				return matchResults;
 			for (AbstractNode match : matchers[i].match(input, start).matches)
 			{
 				allResults.add(match);
