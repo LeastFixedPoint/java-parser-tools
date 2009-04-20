@@ -23,7 +23,8 @@ public class ChoiceMatcher extends Matcher
 	public MatchResults match(final String input, int start) 
 	{
 		final List<AbstractNode> combinedResults = new ArrayList<AbstractNode>();
-		
+
+		MatchResults err= null;
 		for (int i = 0; i < matchers.length; i++)
 		{
 			MatchResults results= matchers[i].match(input, start);
@@ -36,10 +37,16 @@ public class ChoiceMatcher extends Matcher
 					combinedResults.add(node);
 				}
 			}
+			else if (err == null || err.position < results.position)
+				err= results;
 		}
 		
-		if (combinedResults.isEmpty()) 
+		if (combinedResults.isEmpty())
+		{
+			if (err != null)
+				return err;
 			return new MatchResults("Expected "+getLabel(), start);
+		}
 
 		return new MatchResults(combinedResults);
 	}
