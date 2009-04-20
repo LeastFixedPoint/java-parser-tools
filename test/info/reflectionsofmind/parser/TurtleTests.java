@@ -79,14 +79,36 @@ extends TestCase
 		Assert.assertEquals(3, statements.size());
 		
 		
-		document= "@prefix meteor: <meteor:net.sf.meteor.> .\n" +
-				"@prefix jdbc: <meteor:net.sf.meteor.storage.jdbc.> .\n" +
-				"@prefix h2: <meteor:net.sf.meteor.library.h2.> .\n\n" +
-				"h2:H2Driver meteor:Resource.type jdbc:JDBCDriverDescriptor ;\n" +
-				"jdbc:JDBCDriverDescriptor.protocol \"jdbc:h2\" ;\n" +
-				"jdbc:JDBCDriverDescriptor.driverClass \"org.h2.Driver\" .\n\n\n\n\n\n\n"; 
-		results= Matchers.fullMatch(matcher, document);
-		Assert.assertEquals(0, results.matches.size());
+		
+
+		Matcher predicateValuesMatcher= TurtleGrammar.getMatcher(TurtleGrammar.PREDICATE_VALUES);
+		document= "meteor:Resource.type jdbc:JDBCDriverDescriptor"; 
+		results= predicateValuesMatcher.match(document);
+		Assert.assertFalse(results.success());
+		Assert.assertEquals(15, results.position);
+		Assert.assertEquals("Expected whitespace", results.errorMsg);
+		
+
+		document= "h2:H2Driver meteor:Resource.type jdbc:JDBCDriverDescriptor"; 
+		results= triplesMatcher.match(document);
+		Assert.assertFalse(results.success());
+		Assert.assertEquals(27, results.position);
+		Assert.assertEquals("Expected whitespace", results.errorMsg);
+		
+
+		document= "h2:H2Driver meteor:Resource.type jdbc:JDBCDriverDescriptor."; 
+		results= statementMatcher.match(document);
+		Assert.assertFalse(results.success());
+		Assert.assertEquals(27, results.position);
+		Assert.assertEquals("Expected whitespace", results.errorMsg);
+		
+		document= "h2:H2Driver meteor:Resource.type jdbc:JDBCDriverDescriptor ;\n" +
+			"jdbc:JDBCDriverDescriptor.protocol \"jdbc:h2\" ;\n" +
+			"jdbc:JDBCDriverDescriptor.driverClass \"org.h2.Driver\" .\n\n\n\n\n\n\n"; 
+		results= matcher.match(document);
+		Assert.assertFalse(results.success());
+		Assert.assertEquals(27, results.position);
+		Assert.assertEquals("Expected whitespace", results.errorMsg);
 		
 		
 	}
