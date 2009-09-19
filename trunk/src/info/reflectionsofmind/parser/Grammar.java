@@ -1,23 +1,22 @@
 package info.reflectionsofmind.parser;
 
-import static info.reflectionsofmind.parser.Parsers.cho;
-import static info.reflectionsofmind.parser.Parsers.minc;
-import static info.reflectionsofmind.parser.Parsers.mins;
-import static info.reflectionsofmind.parser.Parsers.opt;
-import static info.reflectionsofmind.parser.Parsers.optc;
-import static info.reflectionsofmind.parser.Parsers.opts;
-import static info.reflectionsofmind.parser.Parsers.range;
-import static info.reflectionsofmind.parser.Parsers.rep;
-import static info.reflectionsofmind.parser.Parsers.repc;
-import static info.reflectionsofmind.parser.Parsers.reps;
-import static info.reflectionsofmind.parser.Parsers.seq;
-import static info.reflectionsofmind.parser.Parsers.str;
+import static info.reflectionsofmind.parser.Matchers.cho;
+import static info.reflectionsofmind.parser.Matchers.minc;
+import static info.reflectionsofmind.parser.Matchers.mins;
+import static info.reflectionsofmind.parser.Matchers.opt;
+import static info.reflectionsofmind.parser.Matchers.optc;
+import static info.reflectionsofmind.parser.Matchers.opts;
+import static info.reflectionsofmind.parser.Matchers.range;
+import static info.reflectionsofmind.parser.Matchers.rep;
+import static info.reflectionsofmind.parser.Matchers.repc;
+import static info.reflectionsofmind.parser.Matchers.reps;
+import static info.reflectionsofmind.parser.Matchers.seq;
+import static info.reflectionsofmind.parser.Matchers.str;
 import info.reflectionsofmind.parser.exception.AmbiguousGrammarException;
 import info.reflectionsofmind.parser.exception.GrammarParsingException;
 import info.reflectionsofmind.parser.exception.InvalidGrammarException;
 import info.reflectionsofmind.parser.exception.UndefinedSymbolException;
 import info.reflectionsofmind.parser.matcher.Matcher;
-import info.reflectionsofmind.parser.matcher.Matchers;
 import info.reflectionsofmind.parser.matcher.NamedMatcher;
 import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.NamedNode;
@@ -30,19 +29,42 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+ 
 public class Grammar
 {
 	public static final Matcher GRAMMAR;
 
+	/**
+	 * @param grammarCode
+	 *            A {@link String} containing the definition of grammar in EBNF. See <a
+	 *            href="http://en.wikipedia.org/wiki/Ebnf">wiki article</a> for generic description and <a
+	 *            href="http://code.google.com/p/java-parser-tools/wiki/GrammarFormat">project page</a> for detailed
+	 *            format specification.
+	 * 
+	 * @param rootDefinition
+	 *            Name of the top-level definition in the grammar.
+	 * 
+	 * @return A {@link Matcher} corresponding to this grammar.
+	 * 
+	 * @throws AmbiguousGrammarException
+	 *             If the grammar definition string is incorrect.
+	 * 
+	 * @throws InvalidGrammarException
+	 *             If the grammar definition string is incorrect.
+	 * 
+	 * @throws UndefinedSymbolException
+	 *             If grammar references a symbol that is not defined in it.
+	 */
 	public static Matcher generate(final String grammarCode, final String rootDefinition) throws GrammarParsingException
 	{
-		final List<Result> results = Matchers.fullMatch(GRAMMAR, grammarCode);
+		final List<ResultTree> results = Matchers.fullMatch(GRAMMAR, grammarCode);
 
-		if (results.size() > 1) throw new AmbiguousGrammarException(results);
-		if (results.isEmpty()) throw new InvalidGrammarException(GRAMMAR.match(grammarCode));
+		if (results.size() > 1)
+			throw new AmbiguousGrammarException(results);
+		if (results.isEmpty())
+			throw new InvalidGrammarException(GRAMMAR.match(grammarCode));
 
-		final NamedNode grammar = (NamedNode) results.get(0).node;
+		final NamedNode grammar = (NamedNode) results.get(0).root;
 		final Map<String, NamedMatcher> definitions = new HashMap<String, NamedMatcher>();
 
 		for (final NamedNode definition : grammar.getNamedChildren())
@@ -59,15 +81,15 @@ public class Grammar
 		}
 
 		// check for undefined identifiers
-		List<AbstractNode> identifierNodes= Navigation.findAllDecendentsById(grammar, "identifier");
-		for (AbstractNode identifierNode : identifierNodes) 
+		List<AbstractNode> identifierNodes = Navigation.findAllDecendentsById(grammar, "identifier");
+		for (AbstractNode identifierNode : identifierNodes)
 		{
-			String identifier= identifierNode.getText();
+			String identifier = identifierNode.getText();
 			if (definitions.get(identifier) == null)
 				throw new UndefinedSymbolException(identifier);
 		}
 
-		Matcher matcher= definitions.get(rootDefinition);
+		Matcher matcher = definitions.get(rootDefinition);
 		if (matcher == null)
 			throw new UndefinedSymbolException(rootDefinition);
 		return matcher;
@@ -84,32 +106,50 @@ public class Grammar
 
 		final Matcher[] matchers = matchersList.toArray(new Matcher[] {});
 
-		if ("seq".equals(expression.id)) return seq(matchers);
-		if ("cho".equals(expression.id)) return cho(matchers);
+		if ("seq".equals(expression.id))
+			return seq(matchers);
+		if ("cho".equals(expression.id))
+			return cho(matchers);
 
-		if ("rep".equals(expression.id)) return rep(createMatcher(expression.getNamedChildren().get(0), definitions));
-		if ("reps".equals(expression.id)) return reps(matchers);
-		if ("repc".equals(expression.id)) return repc(matchers);
+		if ("rep".equals(expression.id))
+			return rep(createMatcher(expression.getNamedChildren().get(0), definitions));
+		if ("reps".equals(expression.id))
+			return reps(matchers);
+		if ("repc".equals(expression.id))
+			return repc(matchers);
 
-		if ("opt".equals(expression.id)) return opt(createMatcher(expression.getNamedChildren().get(0), definitions));
-		if ("opts".equals(expression.id)) return opts(matchers);
-		if ("optc".equals(expression.id)) return optc(matchers);
+		if ("opt".equals(expression.id))
+			return opt(createMatcher(expression.getNamedChildren().get(0), definitions));
+		if ("opts".equals(expression.id))
+			return opts(matchers);
+		if ("optc".equals(expression.id))
+			return optc(matchers);
 
-		if ("string".equals(expression.id)) return str(expression.getText());
-		if ("identifier".equals(expression.id)) return definitions.get(expression.getText());
-		if ("expression".equals(expression.id)) return createMatcher(expression.getNamedChildren().get(0), definitions);
+		if ("string".equals(expression.id))
+			return str(expression.getText());
+		if ("identifier".equals(expression.id))
+			return definitions.get(expression.getText());
+		if ("expression".equals(expression.id))
+			return createMatcher(expression.getNamedChildren().get(0), definitions);
 
-		if ("anyLower".equals(expression.id)) return range('a', 'z');
-		if ("anyUpper".equals(expression.id)) return range('A', 'Z');
-		if ("anyAlpha".equals(expression.id)) return cho(range('a', 'z'), range('A', 'Z'));
-		if ("anyDigit".equals(expression.id)) return range('0', '9');
-		if ("anyWhitespace".equals(expression.id)) return minc(1, str(" "), str("\t"), str("\n"), str("\r"));
+		if ("anyLower".equals(expression.id))
+			return range('a', 'z');
+		if ("anyUpper".equals(expression.id))
+			return range('A', 'Z');
+		if ("anyAlpha".equals(expression.id))
+			return cho(range('a', 'z'), range('A', 'Z'));
+		if ("anyDigit".equals(expression.id))
+			return range('0', '9');
+		if ("anyWhitespace".equals(expression.id))
+			return minc(1, str(" "), str("\t"), str("\n"), str("\r"));
 
 		throw new RuntimeException("Cannot parse expresion [" + expression.id + "]:\n" + Nodes.toStringFull(expression));
 	}
 
 	static
 	{
+		// Creating the GRAMMAR Matcher for parsing grammar strings.
+		
 		final Matcher whitespace = minc(1, str(" "), str("\t"), str("\n"), str("\r"));
 		final Matcher optwh = opt(whitespace);
 
@@ -158,16 +198,20 @@ public class Grammar
 		string.define(new Matcher()
 		{
 			@Override
-			public List<Result> match(String input)
+			public List<ResultTree> match(String input)
 			{
+				// Firstly, find the closing double-quote skipping all escaped double-quotes.
 				int pos = input.indexOf('"');
 				while (pos > 0 && input.charAt(pos - 1) == '\'')
-					pos = input.indexOf('"', pos+1);
+					pos = input.indexOf('"', pos + 1);
 
-				if (pos == -1) return Collections.<Result> emptyList();
-				
-				String text= input.substring(0, pos).replaceAll("\'\"", "\"");
-				return Arrays.asList(new Result(new NamedNode("string", text), pos));
+				// If it is not found, then what we are matching is not a string
+				if (pos == -1)
+					return Collections.<ResultTree> emptyList();
+
+				// If it is found, extract the string between quotes
+				String text = input.substring(0, pos).replaceAll("\'\"", "\"");
+				return Arrays.asList(new ResultTree(new NamedNode("string", text), pos));
 			}
 		});
 

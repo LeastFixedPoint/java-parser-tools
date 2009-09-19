@@ -1,10 +1,9 @@
 package info.reflectionsofmind.parser;
 
 import info.reflectionsofmind.parser.matcher.Matcher;
-import info.reflectionsofmind.parser.matcher.Matchers;
 import info.reflectionsofmind.parser.node.NamedNode;
 import info.reflectionsofmind.parser.node.Nodes;
-
+ 
 public class Application
 {
 	public static void main(final String[] args) throws Exception
@@ -24,10 +23,10 @@ public class Application
 		System.out.println("Grammar generated in: " + delay);
 
 		start = System.currentTimeMillis();
-		Result result = Matchers.fullMatch(matcher, "2+2").get(0);
+		ResultTree result = Matchers.fullMatch(matcher, "2+2").get(0);
 		delay = System.currentTimeMillis() - start;
 		System.out.println("Input parsed in: " + delay);
 
-		System.out.println(Nodes.toStringNamed((NamedNode) result.node));
+		System.out.println(Nodes.toStringNamed((NamedNode) result.root));
 	}
 }

@@ -3,8 +3,8 @@
  */
 package info.reflectionsofmind.parser.matcher;
 
-import info.reflectionsofmind.parser.Parsers;
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.Matchers;
+import info.reflectionsofmind.parser.ResultTree;
 import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.RepetitionNode;
 
@@ -30,10 +30,10 @@ public final class RepetitionMatcher implements Matcher
 		switch (type)
 		{
 			case SEQUENCE:
-				this.matcher = Parsers.seq(matchers);
+				this.matcher = Matchers.seq(matchers);
 				break;
 			case CHOICE:
-				this.matcher = Parsers.cho(matchers);
+				this.matcher = Matchers.cho(matchers);
 				break;
 			default:
 				throw new RuntimeException("Unknown repetition matcher subtype: " + type);
@@ -48,9 +48,9 @@ public final class RepetitionMatcher implements Matcher
 	}
 
 	@Override
-	public List<Result> match(final String input)
+	public List<ResultTree> match(final String input)
 	{
-		final List<Result> combinedResults = new ArrayList<Result>();
+		final List<ResultTree> combinedResults = new ArrayList<ResultTree>();
 
 		final List<Matcher> repetition = new ArrayList<Matcher>();
 
@@ -59,29 +59,29 @@ public final class RepetitionMatcher implements Matcher
 			repetition.add(matcher);
 		}
 
-		final List<Result> results = Parsers.seq(repetition.toArray(new Matcher[] {})).match(input);
+		final List<ResultTree> results = Matchers.seq(repetition.toArray(new Matcher[] {})).match(input);
 
-		for (final Result result : results)
+		for (final ResultTree result : results)
 		{
 			final AbstractNode node = new RepetitionNode();
-			node.children.addAll(result.node.children);
-			combinedResults.add(new Result(node, result.rest));
+			node.children.addAll(result.root.children);
+			combinedResults.add(new ResultTree(node, result.rest));
 		}
 
 		for (int i = 1; i <= max - min; i++)
 		{
-			final List<Result> combinedSubResults = new ArrayList<Result>();
+			final List<ResultTree> combinedSubResults = new ArrayList<ResultTree>();
 
-			for (final Result result : results)
+			for (final ResultTree result : results)
 			{
-				final List<Result> subResults = Parsers.reps(i, i, matcher).match(input.substring(result.rest));
+				final List<ResultTree> subResults = Matchers.reps(i, i, matcher).match(input.substring(result.rest));
 
-				for (final Result subResult : subResults)
+				for (final ResultTree subResult : subResults)
 				{
 					final AbstractNode node = new RepetitionNode();
-					node.children.addAll(result.node.children);
-					node.children.addAll(subResult.node.children);
-					combinedSubResults.add(new Result(node, result.rest + subResult.rest));
+					node.children.addAll(result.root.children);
+					node.children.addAll(subResult.root.children);
+					combinedSubResults.add(new ResultTree(node, result.rest + subResult.rest));
 				}
 			}
 

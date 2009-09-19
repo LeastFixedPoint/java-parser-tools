@@ -1,6 +1,6 @@
 package info.reflectionsofmind.parser.matcher.common;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.ResultTree;
 import info.reflectionsofmind.parser.matcher.Matcher;
 import info.reflectionsofmind.parser.node.StringNode;
 
@@ -14,16 +14,16 @@ implements Matcher
 	static final private IntegerMatcher __integerMatcher= new IntegerMatcher();
 	//decimal ::= ([sign] ((digits "." {digits}) | ("." digits) | digits)) 
 	@Override
-	public List<Result> match(String input)
+	public List<ResultTree> match(String input)
 	{
 		int i;
-		List<Result> integers= __integerMatcher.match(input);
+		List<ResultTree> integers= __integerMatcher.match(input);
 		if (integers.isEmpty()) {
 			if ('.' != input.charAt(0)) 
-				return Collections.<Result> emptyList();
+				return Collections.<ResultTree> emptyList();
 			integers= __integerMatcher.match(input.substring(1));
 			if (integers.isEmpty()) 
-				return Collections.<Result> emptyList();
+				return Collections.<ResultTree> emptyList();
 			i= integers.get(0).rest+1;
 		}
 		else {
@@ -37,6 +37,6 @@ implements Matcher
 			}
 		}
 		
-		return Arrays.asList(new Result(new StringNode(input.substring(0, i)), i));
+		return Arrays.asList(new ResultTree(new StringNode(input.substring(0, i)), i));
 	}
 }
