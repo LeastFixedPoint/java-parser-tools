@@ -156,7 +156,7 @@ public final class Matchers
 	}
 
 	// ============================================================================================
-	// === OPTIONAL MATCHERS
+	// === MATCHING UTILITY METHODS
 	// ============================================================================================
 
 	public static List<ResultTree> fullMatch(final Matcher matcher, final String input)
