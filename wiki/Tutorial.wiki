@@ -38,7 +38,7 @@ But given that a grammar may be ambiguous, the `Matchers.fullMatch`  method retu
 {{{
 List<ResultTree> results = Matchers.fullMatch(matcher, "2+2");
 ResultTree firstResult = results.get(0);
-NamedNode root = (NamedNode) firstResult.node;
+NamedNode root = (NamedNode) firstResult.root;
 }}}
 
 That root node corresponds to the "expression" rule in the grammar. We can descend into child nodes using the `getNamedChildren()` method of a `NamedNode`.
