@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
- 
+
 public class Grammar
 {
 	public static final Matcher GRAMMAR;
@@ -46,14 +46,16 @@ public class Grammar
 	 * 
 	 * @return A {@link Matcher} corresponding to this grammar.
 	 * 
-	 * @throws AmbiguousGrammarException
-	 *             If the grammar definition string is incorrect.
-	 * 
 	 * @throws InvalidGrammarException
-	 *             If the grammar definition string is incorrect.
+	 *             If the grammar definition string is invalid.
 	 * 
 	 * @throws UndefinedSymbolException
 	 *             If grammar references a symbol that is not defined in it.
+	 * 
+	 * @throws AmbiguousGrammarException
+	 *             If the grammar definition string is ambiguous - can be parsed as two different grammars. In theory,
+	 *             this can not happen. Please contact the author if it did because he would very much grateful to know
+	 *             how you did it.
 	 */
 	public static Matcher generate(final String grammarCode, final String rootDefinition) throws GrammarParsingException
 	{
@@ -61,6 +63,7 @@ public class Grammar
 
 		if (results.size() > 1)
 			throw new AmbiguousGrammarException(results);
+
 		if (results.isEmpty())
 			throw new InvalidGrammarException(GRAMMAR.match(grammarCode));
 
@@ -149,7 +152,7 @@ public class Grammar
 	static
 	{
 		// Creating the GRAMMAR Matcher for parsing grammar strings.
-		
+
 		final Matcher whitespace = minc(1, str(" "), str("\t"), str("\n"), str("\r"));
 		final Matcher optwh = opt(whitespace);
 
