@@ -63,7 +63,7 @@ System.out.println(firstArgument.getText()+ " + " + secondArgument.getText());
 To pretty-print a `NamedNode` tree, use the `Matchers.toStringNamed` method:
 
 {{{
-System.out.println(root)
+System.out.println(Matchers.toStringNamed(root));
 }}}
 
 The console output will be:
