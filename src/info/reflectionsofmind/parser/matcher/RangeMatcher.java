@@ -3,7 +3,7 @@
  */
 package info.reflectionsofmind.parser.matcher;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.ResultTree;
 import info.reflectionsofmind.parser.node.StringNode;
 
 import java.util.Arrays;
@@ -22,15 +22,15 @@ public final class RangeMatcher implements Matcher
 	}
 
 	@Override
-	public List<Result> match(final String input)
+	public List<ResultTree> match(final String input)
 	{
-		if (input.isEmpty()) return Collections.<Result> emptyList();
+		if (input.isEmpty()) return Collections.<ResultTree> emptyList();
 
 		for (char ch = from; ch < to; ch++)
 		{
-			if (input.charAt(0) == ch) return Arrays.asList(new Result(new StringNode("" + ch), 1));
+			if (input.charAt(0) == ch) return Arrays.asList(new ResultTree(new StringNode("" + ch), 1));
 		}
 
-		return Collections.<Result> emptyList();
+		return Collections.<ResultTree> emptyList();
 	}
 }

@@ -1,6 +1,6 @@
 package info.reflectionsofmind.parser.matcher.common;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.ResultTree;
 import info.reflectionsofmind.parser.matcher.Matcher;
 import info.reflectionsofmind.parser.node.StringNode;
 
@@ -11,14 +11,14 @@ import java.util.List;
 public class WhitespaceMatcher implements Matcher
 {
 	@Override
-	public List<Result> match(String input)
+	public List<ResultTree> match(String input)
 	{
 		int len= input.length();
 		int i= 0;
 		while (i < len && Character.isWhitespace(input.charAt(i)))
 			i++;
 		if (i <= 0)
-			return Collections.<Result> emptyList();
-		return Arrays.asList(new Result(new StringNode(input.substring(0, i)), i));
+			return Collections.<ResultTree> emptyList();
+		return Arrays.asList(new ResultTree(new StringNode(input.substring(0, i)), i));
 	}
 }

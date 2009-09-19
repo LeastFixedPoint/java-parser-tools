@@ -1,6 +1,6 @@
 package info.reflectionsofmind.parser.matcher.common;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.ResultTree;
 import info.reflectionsofmind.parser.matcher.Matcher;
 import info.reflectionsofmind.parser.node.StringNode;
 
@@ -12,21 +12,21 @@ public class QuotedStringMatcher
 implements Matcher
 {
 	@Override
-	public List<Result> match(String input)
+	public List<ResultTree> match(String input)
 	{
 		if (input.length() <= 0 || input.charAt(0) != '"' )
-			return Collections.<Result> emptyList();
+			return Collections.<ResultTree> emptyList();
 		
 		int pos = input.indexOf('"', 1);
 		while (pos > 0 && input.charAt(pos - 1) == '\'')
 			pos = input.indexOf('"', pos+1);
 
 		if (pos == -1 || input.charAt(pos) != '"') 
-			return Collections.<Result> emptyList();
+			return Collections.<ResultTree> emptyList();
 		pos++;
 
 		String text= input.substring(0, pos).replaceAll("\'\"", "\"");
-		return Arrays.asList(new Result(new StringNode(text), pos));
+		return Arrays.asList(new ResultTree(new StringNode(text), pos));
 	}
 
 }

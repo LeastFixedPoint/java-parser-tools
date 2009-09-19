@@ -3,7 +3,7 @@ package info.reflectionsofmind.parser.matcher;
 import java.util.ArrayList;
 import java.util.List;
 
-import info.reflectionsofmind.parser.Result;
+import info.reflectionsofmind.parser.ResultTree;
 import info.reflectionsofmind.parser.node.AbstractNode;
 import info.reflectionsofmind.parser.node.NamedNode;
 
@@ -24,15 +24,15 @@ public class NamedMatcher implements Matcher
 	}
 	
 	@Override
-	public List<Result> match(String input)
+	public List<ResultTree> match(String input)
 	{
-		List<Result> results = new ArrayList<Result>();
+		List<ResultTree> results = new ArrayList<ResultTree>();
 		
-		for (Result result : this.definition.match(input))
+		for (ResultTree result : this.definition.match(input))
 		{
 			final AbstractNode node = new NamedNode(this.id);
-			node.children.add(result.node);
-			results.add(new Result(node, result.rest));
+			node.children.add(result.root);
+			results.add(new ResultTree(node, result.rest));
 		}
 		
 		return results;
