@@ -36,7 +36,7 @@ public final class Matchers
 
 	public static Matcher range(final char from, final char to)
 	{
-		return new RangeMatcher(to, from);
+		return new RangeMatcher(from, to);
 	}
 
 	public static Matcher seq(final Matcher... matchers)
